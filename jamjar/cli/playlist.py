@@ -130,55 +130,56 @@ class Playlist:
         except Exception as e:
             raise RuntimeError(f"Failed to export playlist: {e}")
 
-    def list_playlists(self):
-        """List all playlists in the database."""
+    def list_content(self, playlist_id=None):
+        """
+        List playlists or tracks in a playlist based on the presence of playlist_id.
+        If playlist_id is None, lists all playlists. Otherwise, lists tracks in the given playlist.
+        """
         try:
-            playlists = self.db.fetch_playlists()
-            if not playlists:
-                print("No playlists found.")
-                return
+            if playlist_id is None:
+                # List all playlists
+                playlists = self.db.fetch_playlists()
+                if not playlists:
+                    print("No playlists found.")
+                    return
 
-            id_width = max(len("ID"), *(len(str(playlist[0])) for playlist in playlists))
-            name_width = max(len("Name"), *(len(playlist[1]) for playlist in playlists))
-            desc_width = max(len("Description"), *(len(playlist[3]) for playlist in playlists))
+                id_width = max(len("ID"), *(len(str(playlist[0])) for playlist in playlists))
+                name_width = max(len("Name"), *(len(playlist[1]) for playlist in playlists))
+                desc_width = max(len("Description"), *(len(playlist[3]) for playlist in playlists))
 
-            print(f"{'ID':<{id_width}} | {'Name':<{name_width}} | {'Description':<{desc_width}}")
-            print("-" * (id_width + name_width + desc_width + 9))
+                print(f"{'ID':<{id_width}} | {'Name':<{name_width}} | {'Description':<{desc_width}}")
+                print("-" * (id_width + name_width + desc_width + 9))
 
-            for playlist in playlists:
-                print(f"{playlist[0]:<{id_width}} | {playlist[1]:<{name_width}} | {playlist[3]:<{desc_width}}")
-        except Exception as e:
-            raise RuntimeError(f"Failed to list playlists: {e}")
+                for playlist in playlists:
+                    print(f"{playlist[0]:<{id_width}} | {playlist[1]:<{name_width}} | {playlist[3]:<{desc_width}}")
+            else:
+                # List tracks in the given playlist
+                playlist = self.db.fetch_playlist_by_id(playlist_id)
+                if not playlist:
+                    raise ValueError(f"Playlist with ID {playlist_id} not found.")
 
-    def list_tracks(self, playlist_id):
-        """List all tracks in a playlist."""
-        try:
-            playlist = self.db.fetch_playlist_by_id(playlist_id)
-            if not playlist:
-                raise ValueError(f"Playlist with ID {playlist_id} not found.")
+                tracks = self.db.fetch_playlist_tracks(playlist_id)
+                if not tracks:
+                    print("No tracks found.")
+                    return
 
-            tracks = self.db.fetch_playlist_tracks(playlist_id)
-            if not tracks:
-                print("No tracks found.")
-                return
+                id_width = max(len("ID"), *(len(str(track[0])) for track in tracks))
+                name_width = max(len("Name"), *(len(track[2]) for track in tracks))
+                artist_width = max(len("Artist"), *(len(track[3]) for track in tracks))
+                user_width = max(len("User Added"), *(len(track[5]) for track in tracks))
+                time_width = max(len("Time Added"), *(len(track[6]) for track in tracks))
 
-            id_width = max(len("ID"), *(len(str(track[0])) for track in tracks))
-            name_width = max(len("Name"), *(len(track[2]) for track in tracks))
-            artist_width = max(len("Artist"), *(len(track[3]) for track in tracks))
-            user_width = max(len("User Added"), *(len(track[5]) for track in tracks))
-            time_width = max(len("Time Added"), *(len(track[6]) for track in tracks))
-
-            print(
-                f"{'ID':<{id_width}} | {'Name':<{name_width}} | {'Artist':<{artist_width}} | {'User Added':<{user_width}} | {'Time Added':<{time_width}}"
-            )
-            print("-" * (id_width + name_width + artist_width + user_width + time_width + 13))
-
-            for track in tracks:
                 print(
-                    f"{track[0]:<{id_width}} | {track[2]:<{name_width}} | {track[3]:<{artist_width}} | {track[5]:<{user_width}} | {track[6]:<{time_width}}"
+                    f"{'ID':<{id_width}} | {'Name':<{name_width}} | {'Artist':<{artist_width}} | {'User Added':<{user_width}} | {'Time Added':<{time_width}}"
                 )
+                print("-" * (id_width + name_width + artist_width + user_width + time_width + 13))
+
+                for track in tracks:
+                    print(
+                        f"{track[0]:<{id_width}} | {track[2]:<{name_width}} | {track[3]:<{artist_width}} | {track[5]:<{user_width}} | {track[6]:<{time_width}}"
+                    )
         except Exception as e:
-            raise RuntimeError(f"Failed to list tracks: {e}")
+            raise RuntimeError(f"Failed to list content: {e}")
 
 
 @click.group()
@@ -229,21 +230,12 @@ def clean(playlist_id):
 
 @playlist.command()
 @click.help_option("--help", "-h")
-def list():
-    """List all playlists stored in the database."""
+@click.argument("playlist_id", required=False)
+def list(playlist_id=None):
+    """List all playlists or tracks in a playlist."""
     db = Database(CONFIG)
     playlist_manager = Playlist(db, None)
-    playlist_manager.list_playlists()
-
-
-@playlist.command()
-@click.help_option("--help", "-h")
-@click.argument("playlist_id")
-def list_tracks(playlist_id):
-    """List all tracks stored in the database."""
-    db = Database(CONFIG)
-    playlist_manager = Playlist(db, None)
-    playlist_manager.list_tracks(playlist_id)
+    playlist_manager.list_content(playlist_id)
 
 
 @playlist.command()
