@@ -100,6 +100,49 @@ class Playlist:
         except Exception as e:
             raise RuntimeError(f"Failed to clean playlist: {e}")
 
+    def export(self, playlist_id, output=None):
+        """Export the playlist to a JSON file."""
+        try:
+            playlist = self.db.fetch_playlist_by_id(playlist_id)
+            if not playlist:
+                raise ValueError(f"Playlist with ID {playlist_id} not found.")
+
+            tracks = self.db.fetch_playlist_tracks(playlist_id)
+            if not tracks:
+                print("No tracks found.")
+                return
+
+            playlist = playlist[0]
+            playlist_data = {
+                "id": playlist[0],
+                "name": playlist[2],
+                "owner": playlist[2],
+                "description": playlist[3],
+                "url": playlist[4],
+                "tracks": [
+                    {
+                        "id": track[1],
+                        "name": track[2],
+                        "artist": track[3],
+                        "url": track[4],
+                        "user_added": track[5],
+                        "time_added": track[6],
+                    }
+                    for track in tracks
+                ],
+            }
+
+            if not output:
+                char_map = {ord(c): "_" for c in "!@#$%^&*()[]{};:,.<>?/'\"\\| "}
+                output = f"{playlist[1].translate(char_map)}.json"
+
+            with open(output, "w") as f:
+                json.dump(playlist_data, f, indent=2)
+
+            print(f"Playlist data exported to {output}.")
+        except Exception as e:
+            raise RuntimeError(f"Failed to export playlist: {e}")
+
     def list_playlists(self):
         """List all playlists in the database."""
         try:
@@ -214,3 +257,14 @@ def list_tracks(playlist_id):
     db = Database(CONFIG)
     playlist_manager = Playlist(db, None)
     playlist_manager.list_tracks(playlist_id)
+
+
+@playlist.command()
+@click.help_option("--help", "-h")
+@click.argument("playlist_id")
+@click.option("--output", "-o", help="Output file for the playlist data.")
+def export(playlist_id, output=None):
+    """Export the playlist to a JSON file."""
+    db = Database(CONFIG)
+    playlist_manager = Playlist(db, None)
+    playlist_manager.export(playlist_id, output)
