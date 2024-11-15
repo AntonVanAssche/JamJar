@@ -36,14 +36,14 @@ maintaining a bit of structure and fun.
 
 1. Clone the repository:
 
-   ```bash
+   ```console
    git clone https://github.com/your-repo/jamjar.git
    cd jamjar
    ```
 
 2. Set up a virtual environment:
 
-   ```bash
+   ```console
    python3 -m venv venv
    source venv/bin/activate  # For Linux/macOS
    venv\Scripts\activate     # For Windows
@@ -51,7 +51,7 @@ maintaining a bit of structure and fun.
 
 3. Install dependencies:
 
-   ```bash
+   ```console
    pip install -r requirements.txt
    ```
 
@@ -72,13 +72,13 @@ JamJar's commands are divided into logical groups: `auth` for authentication and
 
 ### General Commands
 
-```bash
+```console
 jamjar --help
 ```
 
 Displays the list of available commands and options.
 
-```bash
+```console
 jamjar --version
 ```
 
@@ -86,7 +86,7 @@ Shows the current version of JamJar.
 
 ### Authentication Commands
 
-```bash
+```console
 jamjar auth --help
 ```
 
@@ -100,7 +100,7 @@ Manages authentication with Spotify.
 
 ### Playlist Commands
 
-```bash
+```console
 jamjar playlist --help
 ```
 
@@ -118,31 +118,31 @@ Handles Spotify playlist management.
 
 ### Authenticate with Spotify
 
-```bash
+```console
 jamjar auth login
 ```
 
 ### Save a playlist
 
-```bash
+```console
 jamjar playlist save https://open.spotify.com/playlist/playlist_id
 ```
 
 ### List stored playlists
 
-```bash
+```console
 jamjar playlist list
 ```
 
 ### Clean up removed tracks
 
-```bash
+```console
 jamjar playlist clean https://open.spotify.com/playlist/playlist_id
 ```
 
 ### Export a playlist
 
-```bash
+```console
 jamjar playlist export MY_PLAYLIST_ID --output my_playlist.json
 ```
 
