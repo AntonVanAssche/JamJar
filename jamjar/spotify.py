@@ -57,5 +57,13 @@ class SpotifyAPI:
         """Fetch the tracks of a specific playlist from Spotify."""
         url = f"{self.base_url}/playlists/{playlist_id}/tracks"
         headers = {"Authorization": f"Bearer {self.access_token}"}
-        response = requests.get(url, headers=headers)
-        return response.json()
+        all_tracks = []
+
+        while url:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()  # Raise an error for HTTP failures
+            data = response.json()
+            all_tracks.extend(data["items"])
+            url = data.get("next")  # Get the URL for the next page of results
+
+        return {"items": all_tracks}
