@@ -4,6 +4,8 @@ import sqlite3
 from pathlib import Path
 from typing import List, Tuple
 
+from jamjar.config import Config
+
 
 class DatabaseError(Exception):
     """Custom exception for database-related errors."""
@@ -12,8 +14,8 @@ class DatabaseError(Exception):
 
 
 class Database:
-    def __init__(self, config):
-        self.db_path = Path(config.get("db_path", "~/.jamjar.db")).expanduser()
+    def __init__(self, config: Config):
+        self.db_path = Path(config.db_path).expanduser()
         self.connection = None
         self._initialize_database()
 

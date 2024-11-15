@@ -40,3 +40,8 @@ class Config:
     def redirect_uri(self):
         """Retrieve the redirect URI from the config."""
         return self.get("redirect_uri", "http://localhost:5000/callback")
+
+    @property
+    def db_path(self):
+        """Retrieve the database path from the config."""
+        return self.get("db_path", "~/.jamjar.db")
