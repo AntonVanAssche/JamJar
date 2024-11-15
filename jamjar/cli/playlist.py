@@ -152,12 +152,14 @@ class Playlist:
 
 
 @click.group()
+@click.help_option("--help", "-h")
 def playlist():
     """Manage Spotify playlists."""
     pass
 
 
 @playlist.command()
+@click.help_option("--help", "-h")
 @click.argument("url")
 def save(url):
     """Save the playlist and tracks to the database."""
@@ -170,6 +172,7 @@ def save(url):
 
 
 @playlist.command()
+@click.help_option("--help", "-h")
 @click.argument("playlist_id")
 def update(playlist_id):
     """Update an existing playlist in the database."""
@@ -182,6 +185,7 @@ def update(playlist_id):
 
 
 @playlist.command()
+@click.help_option("--help", "-h")
 @click.argument("url")
 def clean(url):
     """Remove tracks not in the current playlist."""
@@ -194,6 +198,7 @@ def clean(url):
 
 
 @playlist.command()
+@click.help_option("--help", "-h")
 def list():
     """List all playlists stored in the database."""
     db = Database(CONFIG)
@@ -202,6 +207,7 @@ def list():
 
 
 @playlist.command()
+@click.help_option("--help", "-h")
 @click.argument("playlist_id")
 def list_tracks(playlist_id):
     """List all tracks stored in the database."""

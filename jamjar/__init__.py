@@ -12,6 +12,7 @@ from jamjar.cli.playlist import playlist
 
 
 @click.group()
+@click.help_option("--help", "-h")
 @click.version_option(__version__, "--version", "-v", help="Display the version of JamJar.")
 def cli():
     """JamJar CLI - Store your Spotify playlist data."""

@@ -217,12 +217,14 @@ class Auth:
 
 
 @click.group()
+@click.help_option("--help", "-h")
 def auth():
     """Manage Spotify authentication."""
     pass
 
 
 @auth.command()
+@click.help_option("--help", "-h")
 def login():
     """Log in to Spotify."""
     auth = Auth(CONFIG)
@@ -230,6 +232,7 @@ def login():
 
 
 @auth.command()
+@click.help_option("--help", "-h")
 def status():
     """Display authentication status."""
     auth = Auth(CONFIG)
@@ -237,6 +240,7 @@ def status():
 
 
 @auth.command()
+@click.help_option("--help", "-h")
 def clean():
     """Remove the saved access token."""
     auth = Auth(CONFIG)
