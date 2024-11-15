@@ -8,6 +8,7 @@ import os
 import click
 
 from jamjar.cli.auth import auth
+from jamjar.cli.playlist import playlist
 
 
 @click.group()
@@ -16,6 +17,7 @@ def cli():
 
 
 cli.add_command(auth)
+cli.add_command(playlist)
 
 if __name__ == "__main__":
     cli()
