@@ -45,3 +45,8 @@ class Config:
     def db_path(self):
         """Retrieve the database path from the config."""
         return self.get("db_path", "~/.jamjar.db")
+
+    @property
+    def token_file(self):
+        """Retrieve the token file path from the config."""
+        return self.get("token_file", "~/.jamjar_token.json")

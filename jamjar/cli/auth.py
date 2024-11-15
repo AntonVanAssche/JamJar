@@ -25,6 +25,7 @@ class Auth:
         self.client_id = config.client_id
         self.client_secret = config.client_secret
         self.redirect_uri = config.redirect_uri
+        self.token_file = os.path.expanduser(config.token_file)
 
     def login(self):
         """Initiates the login flow."""
@@ -140,7 +141,7 @@ class Auth:
     def save_token(self, token_info):
         """Saves token info to a file."""
         try:
-            with open(self.TOKEN_FILE, "w") as f:
+            with open(self.token_file, "w") as f:
                 json.dump(token_info, f)
         except Exception as e:
             print(f"Error saving token: {e}")
@@ -149,9 +150,9 @@ class Auth:
     def load_token(self):
         """Loads token info from a file."""
         try:
-            if not os.path.exists(self.TOKEN_FILE):
+            if not os.path.exists(self.token_file):
                 return None
-            with open(self.TOKEN_FILE, "r") as f:
+            with open(self.token_file, "r") as f:
                 return json.load(f)
         except json.JSONDecodeError as e:
             print(f"Error loading token: {e}")
