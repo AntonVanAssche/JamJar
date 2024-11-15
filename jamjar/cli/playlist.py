@@ -73,8 +73,7 @@ class Playlist:
         except Exception as e:
             raise RuntimeError(f"Failed to update playlist: {e}")
 
-    def clean_playlist(self, playlist_url):
-        playlist_id = playlist_url.split("/")[-1].split("?")[0]
+    def clean_playlist(self, playlist_id):
         try:
             tracks_data_api = self.spotify_api.get_playlist_tracks(playlist_id)
             track_ids_api = {track_item["track"]["id"] for track_item in tracks_data_api["items"]}
@@ -217,15 +216,15 @@ def update(playlist_id):
 
 @playlist.command()
 @click.help_option("--help", "-h")
-@click.argument("url")
-def clean(url):
+@click.argument("playlist_id")
+def clean(playlist_id):
     """Remove tracks not in the current playlist."""
     access_token = Auth(CONFIG).get_access_token()
     db = Database(CONFIG)
     spotify_api = SpotifyAPI(access_token)
     playlist_manager = Playlist(db, spotify_api)
 
-    playlist_manager.clean_playlist(url)
+    playlist_manager.clean_playlist(playlist_id)
 
 
 @playlist.command()
