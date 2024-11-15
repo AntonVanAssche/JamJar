@@ -21,11 +21,6 @@ class Config:
                 raise KeyError(f"Configuration key '{key}' not found")
         return self.config_data.get(key, default)
 
-    def save(self):
-        """Save updated configuration to the config file."""
-        with open(CONFIG_FILE, "w") as f:
-            json.dump(self.config_data, f, indent=4)
-
     @property
     def client_id(self):
         """Retrieve the client_id from the config."""
