@@ -17,71 +17,59 @@ class Playlist:
         self.db = db
         self.spotify_api = spotify_api
 
+    def _process_playlist_and_tracks(self, playlist_id, update=False):
+        """Fetch playlist and track data, and either save or update the playlist in the DB."""
+        playlist_data = self.spotify_api.get_playlist(playlist_id)
+        name = playlist_data.get("name", "Unknown Playlist")
+        owner = playlist_data.get("owner", {}).get("id", "Unknown User")
+        description = playlist_data.get("description", "")
+        url = playlist_data["external_urls"]["spotify"]
+
+        if update:
+            self.db.update_playlist(playlist_id, name, owner, description, url)
+        else:
+            self.db.add_playlist(playlist_id, name, owner, description, url)
+
+        tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
+        for track_item in tracks_data["items"]:
+            track = track_item["track"]
+            track_id = track.get("id")
+            if not track_id:
+                continue
+
+            track_name = track.get("name", "Unknown Track")
+            track_artist = ", ".join(artist["name"] for artist in track["artists"])
+            track_url = track["external_urls"]["spotify"]
+            track_user_added = track_item.get("added_by", {}).get("id", "Unknown User")
+            track_time_added = track_item.get("added_at")
+
+            self.db.add_track(
+                playlist_id,
+                track_id,
+                track_name,
+                track_artist,
+                track_url,
+                track_user_added,
+                track_time_added,
+            )
+
+            print(f"{"Updated" if update else "Added"} track '{track_name}' by '{track_artist}' to the database.")
+
+        action = "saved" if not update else "updated"
+        print(f"Playlist '{name}' and tracks {action} to the database.")
+
     def save_playlist(self, playlist_url):
         """Save the playlist and tracks to the database."""
         playlist_id = playlist_url.split("/")[-1].split("?")[0]
         try:
-            playlist_data = self.spotify_api.get_playlist(playlist_id)
-            name = playlist_data.get("name", "Unknown Playlist")
-            owner = playlist_data.get("owner", {}).get("id", "Unknown User")
-            description = playlist_data.get("description", "")
-            url = playlist_data["external_urls"]["spotify"]
-
-            self.db.add_playlist(playlist_id, name, owner, description, url)
-
-            tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
-            for track_item in tracks_data["items"]:
-                track = track_item["track"]
-                track_id = track.get("id")
-                if not track_id:
-                    continue
-
-                track_name = track.get("name", "Unknown Track")
-                track_artist = ", ".join(artist["name"] for artist in track["artists"])
-                track_url = track["external_urls"]["spotify"]
-                user_added = track_item.get("added_by", {}).get("id", "Unknown User")
-                time_added = track_item.get("added_at")
-
-                self.db.add_track(playlist_id, track_id, track_name, track_artist, track_url, user_added, time_added)
-
-            print(f"Playlist '{name}' and tracks saved to the database.")
+            self._process_playlist_and_tracks(playlist_id, update=False)
         except Exception as e:
             raise RuntimeError(f"Failed to save playlist: {e}")
 
     def update_playlist(self, playlist_id):
         """Update an existing playlist in the DB."""
         try:
-            playlist_data = self.spotify_api.get_playlist(playlist_id)
-            name = playlist_data.get("name", "Unknown Playlist")
-            owner = playlist_data.get("owner", {}).get("id", "Unknown User")
-            description = playlist_data.get("description", "")
-            url = playlist_data["external_urls"]["spotify"]
-
-            self.db.update_playlist(playlist_id, name, owner, description, url)
-
-            tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
-            for track_item in tracks_data["items"]:
-                track = track_item["track"]
-                track_id = track.get("id")
-                if not track_id:
-                    continue
-
-                track_name = track.get("name", "Unknown Track")
-                track_artist = ", ".join(artist["name"] for artist in track["artists"])
-                track_url = track["external_urls"]["spotify"]
-                track_user_added = track_item.get("added_by", {}).get("id", "Unknown User")
-                track_time_added = track_item.get("added_at")
-                self.db.add_track(
-                    playlist_id,
-                    track_id,
-                    track_name,
-                    track_artist,
-                    track_url,
-                    track_user_added,
-                    track_time_added,
-                )
-
-            print(f"Playlist '{name}' updated.")
+            self._process_playlist_and_tracks(playlist_id, update=True)
         except Exception as e:
             raise RuntimeError(f"Failed to update playlist: {e}")
 
