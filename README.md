@@ -7,6 +7,31 @@ and its details into a database. No more losing track of who added what or
 what songs were removed—keep your playlist history fresh and intact, like
 music in a jar!
 
+## Behind the Creation of JamJar
+
+The inspiration for JamJar came from a simple yet frustrating limitation of
+Spotify: the inability to track the history of a collaborative playlist. When
+you’re working on a playlist with friends—where everyone can add songs—it’s
+fun to keep things dynamic and fresh.
+
+And you have some rule in place like "when you add a new song, you have to
+remove one of your earlier choices" to keep things balanced and engaging.
+Unfortunately, Spotify doesn’t provide a built-in way to see the history of
+the playlist—like who removed song X or who added song Y. Once a song is
+removed, it’s gone from the playlis, with no trace of its history.
+
+That’s where JamJar comes in. This CLI tool was created to save the state of a
+collaborative playlist to a simple SQLite database. By capturing the playlist
+and track details, including who added each song, JamJar allows you to:
+
+- Preserve a historical record of the playlist.
+- Review the contributions of each collaborator.
+- Export the data for further analysis or backup.
+
+With JamJar, the story of your playlist stays intact, even as tracks come and
+go. It’s a way to celebrate the collaborative spirit of music sharing while
+maintaining a bit of structure and fun.
+
 ## Installation
 
 1. Clone the repository:
