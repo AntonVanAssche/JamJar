@@ -15,13 +15,10 @@ CONFIG = Config()
 
 
 class Auth:
-    REDIRECT_URI = "http://localhost:5000/callback"
-    AUTH_URL = "https://accounts.spotify.com/authorize"
-    TOKEN_URL = "https://accounts.spotify.com/api/token"
-    API_BASE_URL = "https://api.spotify.com/v1"
-    TOKEN_FILE = os.path.expanduser("~/.jamjar_token.json")
-
     def __init__(self, config: Config):
+        self.auth_url = "https://accounts.spotify.com/authorize"
+        self.token_url = "https://accounts.spotify.com/api/token"
+        self.base_url = "https://api.spotify.com/v1"
         self.client_id = config.client_id
         self.client_secret = config.client_secret
         self.redirect_uri = config.redirect_uri
@@ -38,7 +35,7 @@ class Auth:
                 "scope": scope,
                 "show_dialog": True,
             }
-            auth_url = f"{self.AUTH_URL}?{urllib.parse.urlencode(params)}"
+            auth_url = f"{self.auth_url}?{urllib.parse.urlencode(params)}"
             print(f"Please visit the following URL to authorize:\n{auth_url}\n")
             print("After authorizing, the app will handle the callback and complete authentication.")
             self._start_http_server()
@@ -62,7 +59,7 @@ class Auth:
                             token_info = self.server.auth.get_token(code)
                             self.server.auth.save_token(token_info)
                             print(
-                                f"Authentication complete! You are now logged in as {self.server.auth.display_username(token_info['access_token'])}"
+                                f"Authentication complete! You are now logged in as {self.server.auth.display_username(token_info['access_token'])}."
                             )
                         self.send_response(200)
                         self.end_headers()
@@ -95,7 +92,7 @@ class Auth:
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
             }
-            response = requests.post(self.TOKEN_URL, data=body)
+            response = requests.post(self.token_url, data=body)
             response.raise_for_status()  # Raises HTTPError if the response code is 4xx or 5xx
             token_info = response.json()
             token_info["expires_at"] = datetime.now().timestamp() + token_info["expires_in"]
@@ -124,7 +121,7 @@ class Auth:
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
             }
-            response = requests.post(self.TOKEN_URL, data=body)
+            response = requests.post(self.token_url, data=body)
             response.raise_for_status()
             new_token_info = response.json()
             new_token_info["expires_at"] = datetime.now().timestamp() + new_token_info["expires_in"]
@@ -174,7 +171,7 @@ class Auth:
         """Fetches and displays the user's username or display name."""
         try:
             headers = {"Authorization": f"Bearer {access_token}"}
-            response = requests.get(f"{self.API_BASE_URL}/me", headers=headers)
+            response = requests.get(f"{self.base_url}/me", headers=headers)
             response.raise_for_status()
             user_info = response.json()
 
