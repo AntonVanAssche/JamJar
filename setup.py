@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
+    author="Anton Van Assche",
+    author_email="vanasscheanton@gmail.com",
+    description="A CLI tool to store and manage Spotify playlist data in a database.",
+    license="MIT",
     name="jamjar",
-    version="0.1",
-    packages=["jamjar"],
+    packages=find_packages(),
+    url="https://www.github.com/AntonVanAssche/jamjar",
+    version="0.1.0",
     install_requires=[
         "requests",
         "click",
@@ -15,4 +20,13 @@ setup(
             "jamjar=jamjar.__init__:cli",
         ],
     },
+    classifiers=[
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
+    python_requires=">=3.12",
 )
