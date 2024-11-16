@@ -116,7 +116,44 @@ class Database:
                     """,
                     (track_id,),
                 )
-            print(f"Track {track_id} ({track_name} - {track_artist}) deleted.")
+        except sqlite3.Error as e:
+            raise DatabaseError(e)
+
+    def delete_playlist(self, playlist_id: str):
+        """Delete a playlist and its tracks from the database."""
+        try:
+            with self.connection:
+                self.connection.execute(
+                    """
+                    DELETE FROM playlists
+                    WHERE id = ?
+                    """,
+                    (playlist_id,),
+                )
+                self.connection.execute(
+                    """
+                    DELETE FROM tracks
+                    WHERE playlist_id = ?
+                    """,
+                    (playlist_id,),
+                )
+        except sqlite3.Error as e:
+            raise DatabaseError(e)
+
+    def delete_all_playlists(self):
+        """Delete all playlists and their tracks from the database."""
+        try:
+            with self.connection:
+                self.connection.execute(
+                    """
+                    DELETE FROM playlists
+                    """
+                )
+                self.connection.execute(
+                    """
+                    DELETE FROM tracks
+                    """
+                )
         except sqlite3.Error as e:
             raise DatabaseError(e)
 

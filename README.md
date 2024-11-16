@@ -68,82 +68,124 @@ maintaining a bit of structure and fun.
 
 ## Usage
 
-JamJar's commands are divided into logical groups: `auth` for authentication and `playlist` for managing playlists.
-
 ### General Commands
 
 ```console
-jamjar --help
+$ jamjar --help
+Usage: jamjar [OPTIONS] COMMAND [ARGS]...
+
+  "seal” the history of your Spotify playlists
+
+Options:
+  -h, --help     Show this message and exit.
+  -v, --version  Display the version of JamJar.
+
+Commands:
+  add     Add a playlist to the database.
+  auth    Manage Spotify authentication.
+  export  Export a playlist's data to a JSON file.
+  list    List playlists or tracks in a specific playlist.
+  remove  Remove a playlist or a specific track from a playlist.
+  sync    Synchronize a playlist with Spotify.
+  update  Update an existing playlist in the database.
 ```
 
-Displays the list of available commands and options.
+## Command Details
 
-```console
-jamjar --version
-```
+### Authentication
 
-Shows the current version of JamJar.
+#### `jamjar auth login`
 
-### Authentication Commands
-
-```console
-jamjar auth --help
-```
-
-Manages authentication with Spotify.
-
-| Command | Description                        |
-|---------|------------------------------------|
-| `login` | Log in to Spotify.                |
-| `status`| Display current authentication status. |
-| `clean` | Remove the saved access token.    |
-
-### Playlist Commands
-
-```console
-jamjar playlist --help
-```
-
-Handles Spotify playlist management.
-
-| Command    | Description                                    |
-|------------|------------------------------------------------|
-| `save`     | Save the playlist and its tracks to the database. |
-| `update`   | Update an existing playlist in the database.   |
-| `clean`    | Remove tracks not in the current playlist.     |
-| `list`     | List all playlists or tracks in a specific playlist. |
-| `export`   | Export the playlist to a JSON file.            |
-
-## Examples
-
-### Authenticate with Spotify
+Logs in to Spotify and stores the access token for future use.
 
 ```console
 jamjar auth login
 ```
 
-### Save a playlist
+#### `jamjar auth status`
+
+Displays the current authentication status.
 
 ```console
-jamjar playlist save https://open.spotify.com/playlist/playlist_id
+jamjar auth status
 ```
 
-### List stored playlists
+#### `jamjar auth clean`
+
+Removes the saved Spotify access token.
 
 ```console
-jamjar playlist list
+jamjar auth clean
 ```
 
-### Clean up removed tracks
+### Playlist Management
+
+#### `jamjar add <url|id>`
+
+Adds a playlist to the database by URL or playlist ID.
 
 ```console
-jamjar playlist clean https://open.spotify.com/playlist/playlist_id
+jamjar add https://open.spotify.com/playlist/playlist_id
 ```
 
-### Export a playlist
+```console
+jamjar add playlist_id
+```
+
+#### `jamjar update <url|id>`
+
+Updates an existing playlist in the database.
 
 ```console
-jamjar playlist export MY_PLAYLIST_ID --output my_playlist.json
+jamjar update https://open.spotify.com/playlist/playlist_id
+```
+
+```console
+jamjar update playlist_id
+```
+
+#### `jamjar remove <playlist_id> [--track-id <track_id>]`
+
+Removes a playlist or a specific track from a playlist.
+
+```console
+jamjar remove playlist_id
+```
+
+```console
+jamjar remove playlist_id --track-id track_id
+```
+
+#### `jamjar sync <url|id>`
+
+Syncs the playlist with Spotify to update tracks.
+
+```console
+jamjar sync playlist_id
+```
+
+```console
+jamjar sync https://open.spotify.com/playlist/playlist_id
+```
+
+#### `jamjar list [--playlist <id>]`
+
+Lists all playlists or tracks in a specific playlist.
+
+```console
+jamjar list
+```
+
+```console
+jamjar list --playlist playlist_id
+```
+
+#### `jamjar export <id> [--output <filename>]`
+
+Exports a playlist's data to a JSON file.
+
+```console
+jamjar export playlist_id --output my_playlist.json
 ```
 
 ## Configuration
