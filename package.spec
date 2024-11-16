@@ -1,4 +1,4 @@
-%define _version 0.1.0
+%define _version 0.2.0
 %define _release 1
 
 Name:           jamjar
