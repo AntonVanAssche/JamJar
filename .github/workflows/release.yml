@@ -96,8 +96,10 @@ jobs:
 
       - name: Extract package name
         run: |
-          PACKAGE_NAME=$(ls *.rpm | head -n 1)
-          echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
+          PIP_PACKAGE_NAME=$(ls *.tar.gz | head -n 1)
+          RPM_PACKAGE_NAME=$(ls *.rpm | head -n 1)
+          echo "PIP_PACKAGE_NAME=${PIP_PACKAGE_NAME}" >> $GITHUB_ENV
+          echo "RPM_PACKAGE_NAME=${RPM_PACKAGE_NAME}" >> $GITHUB_ENV
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -110,7 +112,15 @@ jobs:
 
       - uses: danielmundi/upload-packagecloud@v1
         with:
-          PACKAGE-NAME: ${{ env.PACKAGE_NAME }}
+          PACKAGE-NAME: ${{ env.PIP_PACKAGE_NAME }}
+          PACKAGECLOUD-USERNAME: AntonVanAssche
+          PACKAGECLOUD-REPO: JamJar
+          PACKAGECLOUD-DISTRIB: python
+          PACKAGECLOUD-TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+
+      - uses: danielmundi/upload-packagecloud@v1
+        with:
+          PACKAGE-NAME: ${{ env.RPM_PACKAGE_NAME }}
           PACKAGECLOUD-USERNAME: AntonVanAssche
           PACKAGECLOUD-REPO: JamJar
           PACKAGECLOUD-DISTRIB: fedora/40/
