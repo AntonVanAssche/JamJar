@@ -64,7 +64,8 @@ class Auth:
             class CallbackHandler(BaseHTTPRequestHandler):
                 """Handles the Spotify callback and exchanges the code for an access token."""
 
-                def do_get(self):
+                # pylint: disable=invalid-name
+                def do_GET(self):
                     """Handles the GET request from Spotify."""
                     try:
                         query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
