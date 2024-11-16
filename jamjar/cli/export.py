@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+CLI command to export a playlist's data to a JSON file.
+
+This module handles exporting a playlist's metadata and its associated tracks
+to a JSON file.
+"""
+
 import json
 
 import click
@@ -10,7 +17,15 @@ from jamjar.database import Database
 CONFIG = Config()
 
 
+# pylint: disable=too-few-public-methods
 class Export:
+    """
+    Handles the logic for exporting a playlist's data to a JSON file.
+
+    This includes fetching the playlist and its associated tracks from the database
+    and writing the data to a JSON file.
+    """
+
     def __init__(self, db: Database):
         self.db = db
 
@@ -59,12 +74,12 @@ class Export:
                 output_file = f"{safe_name}.json"
 
             # Write data to file
-            with open(output_file, "w") as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=4)
 
             print(f"Playlist data exported to {output_file}.")
         except Exception as e:
-            raise RuntimeError(f"Failed to export playlist: {e}")
+            raise RuntimeError(f"Failed to export playlist: {e}") from e
 
 
 @click.command()

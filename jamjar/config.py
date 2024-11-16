@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+This module handles the configuration for the JamJar CLI.
+
+This includes reading the configuration file and retrieving the client_id,
+client_secret, redirect_uri, database path, and token file path.
+"""
+
 import json
 import os
 
@@ -7,11 +14,18 @@ CONFIG_FILE = os.path.expanduser("~/.jamjar_config.json")
 
 
 class Config:
+    """
+    Handles the configuration for the JamJar CLI.
+
+    This includes reading the configuration file and retrieving the client_id,
+    client_secret, redirect_uri, database path, and token file path.
+    """
+
     def __init__(self):
         if not os.path.exists(CONFIG_FILE):
             raise FileNotFoundError(f"Configuration file not found at {CONFIG_FILE}")
 
-        with open(CONFIG_FILE, "r") as f:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             self.config_data = json.load(f)
 
     def get(self, key, default=None):

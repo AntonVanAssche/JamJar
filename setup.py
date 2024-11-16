@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Module to configure the setup for the JamJar CLI.
+"""
+
 from setuptools import find_packages, setup
 
 setup(
@@ -10,7 +14,7 @@ setup(
     name="jamjar",
     packages=find_packages(),
     url="https://www.github.com/AntonVanAssche/jamjar",
-    version="0.1.0",
+    version="0.2.0",
     install_requires=[
         "requests",
         "click",

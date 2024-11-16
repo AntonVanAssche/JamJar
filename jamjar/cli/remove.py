@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+CLI command to remove a playlist or a specific track from a playlist.
+
+This module handles removing a playlist from the JamJar database, as well as
+removing a specific track from a playlist in the database.
+"""
+
 import click
 
 from jamjar.config import Config
@@ -8,7 +15,15 @@ from jamjar.database import Database
 CONFIG = Config()
 
 
+# pylint: disable=too-few-public-methods
 class RemoveManager:
+    """
+    Handles the logic for removing a playlist or a specific track from a playlist.
+
+    This includes removing a playlist and all associated tracks from the database,
+    as well as removing a specific track from a playlist.
+    """
+
     def __init__(self, db: Database):
         self.db = db
 
@@ -17,7 +32,6 @@ class RemoveManager:
         Remove a playlist and all associated tracks from the database.
         """
         try:
-            # Fetch the playlist by ID
             playlist = self.db.fetch_playlist_by_id(playlist_id)
             if not playlist:
                 print(f"Playlist with ID '{playlist_id}' not found.")
@@ -29,7 +43,7 @@ class RemoveManager:
             self.db.delete_playlist(playlist_id)
             print(f"Playlist '{playlist_name}' (ID: {playlist_id}) removed successfully.")
         except Exception as e:
-            raise RuntimeError(f"Failed to remove playlist: {e}")
+            raise RuntimeError(f"Failed to remove playlist: {e}") from e
 
     def remove_track(self, playlist_id, track_id):
         """
@@ -41,12 +55,14 @@ class RemoveManager:
                 print(f"Track with ID '{track_id}' not found in playlist '{playlist_id}'.")
                 return
 
-            self.db.delete_track(track_id, playlist_id, track[3])  # Assuming track[3] is the track artist
+            # pylint: disable=line-too-long
+            self.db.delete_track(track_id, playlist_id, track[3])
             print(f"Track '{track[2]}' by '{track[3]}' removed from playlist '{playlist_id}' successfully.")
         except Exception as e:
-            raise RuntimeError(f"Failed to remove track: {e}")
+            raise RuntimeError(f"Failed to remove track: {e}") from e
 
 
+# pylint: disable=redefined-builtin
 @click.command()
 @click.help_option("--help", "-h")
 @click.argument("playlist_id", required=False)
@@ -72,6 +88,7 @@ def remove(playlist_id=None, track_id=None, all=False, force=False):
     remove_manager = RemoveManager(db)
     if all:
         if not force:
+            # pylint: disable=line-too-long
             confirmation = input("Are you sure you want to remove all playlists and tracks? (y/N): ")
             if confirmation.lower() != "y":
                 print("Aborted.")

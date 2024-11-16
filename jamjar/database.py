@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+Handles the database operations for JamJar.
+
+This includes adding, updating, and deleting playlists and tracks, as well as
+fetching playlists and tracks from the database.
+"""
+
 import sqlite3
 from pathlib import Path
 from typing import List, Tuple
@@ -10,10 +17,15 @@ from jamjar.config import Config
 class DatabaseError(Exception):
     """Custom exception for database-related errors."""
 
-    pass
-
 
 class Database:
+    """
+    Handles the database operations for JamJar.
+
+    This includes adding, updating, and deleting playlists and tracks, as well as
+    fetching playlists and tracks from the database.
+    """
+
     def __init__(self, config: Config):
         self.db_path = Path(config.db_path).expanduser()
         self.connection = None
@@ -25,7 +37,7 @@ class Database:
             if not self.connection:
                 self.connection = sqlite3.connect(self.db_path)
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
     def _initialize_database(self):
         """Initialize the database with required tables if they don't exist."""
@@ -58,8 +70,10 @@ class Database:
                 """
                 )
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     def add_playlist(self, playlist_id: str, name: str, owner: str, description: str, url: str):
         """Add a playlist to the database."""
         try:
@@ -72,8 +86,10 @@ class Database:
                     (playlist_id, name, owner, description, url),
                 )
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     def update_playlist(self, playlist_id: str, name: str, owner: str, description: str, url: str):
         """Update an existing playlist."""
         try:
@@ -87,14 +103,18 @@ class Database:
                     (playlist_id, name, owner, description, url),
                 )
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # pylint: disable=line-too-long
     def add_track(
         self, playlist_id: str, track_id: str, name: str, artist: str, url: str, user_added: str, time_added: str
     ):
         """Add a track to the database."""
         try:
             with self.connection:
+                # pylint: disable=line-too-long
                 self.connection.execute(
                     """
                     INSERT OR REPLACE INTO tracks (id, playlist_id, name, artist, url, user_added, time_added)
@@ -103,9 +123,9 @@ class Database:
                     (track_id, playlist_id, name, artist, url, user_added, time_added),
                 )
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
-    def delete_track(self, track_id: str, track_name: str, track_artist: str):
+    def delete_track(self, track_id: str):
         """Delete a track from the database."""
         try:
             with self.connection:
@@ -117,7 +137,7 @@ class Database:
                     (track_id,),
                 )
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
     def delete_playlist(self, playlist_id: str):
         """Delete a playlist and its tracks from the database."""
@@ -138,7 +158,7 @@ class Database:
                     (playlist_id,),
                 )
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
     def delete_all_playlists(self):
         """Delete all playlists and their tracks from the database."""
@@ -155,7 +175,7 @@ class Database:
                     """
                 )
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
     def fetch_playlists(self) -> List[Tuple]:
         """Fetch all playlists from the database."""
@@ -167,7 +187,7 @@ class Database:
                     """
                 ).fetchall()
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
     def fetch_playlist_by_id(self, playlist_id: str) -> List[Tuple]:
         """Fetch a specific playlist specified by the id."""
@@ -181,7 +201,7 @@ class Database:
                     (playlist_id,),
                 ).fetchall()
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
     def fetch_playlist_tracks(self, playlist_id: str) -> List[Tuple]:
         """Fetch all tracks for a specific playlist."""
@@ -195,7 +215,7 @@ class Database:
                     (playlist_id,),
                 ).fetchall()
         except sqlite3.Error as e:
-            raise DatabaseError(e)
+            raise DatabaseError(e) from e
 
     def close(self):
         """Close the database connection."""
