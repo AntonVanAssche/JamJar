@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=74.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jamjar"
+authors = [
+    { name = "Anton Van Assche", email = "vanasscheanton@gmail.com" },
+]
+maintainers = [
+    { name = "Anton Van Assche", email = "vanasscheanton@gmail.com" },
+]
+description = "A CLI tool designed to \"seal\" the history of your Spotify playlists, just like a jar preserves your favorite jams. "
+dynamic = ["version"]
+readme = "README.md"
+license = { file = "LICENSE.md" }
+requires-python = ">=3.12"
+classifiers = [
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+    "click",
+    "requests",
+]
+
+[project.scripts]
+jamjar = "jamjar:cli"
+
+[project.urls]
+Homepage = "https://github.com/AntonVanAssche/JamJar"
+Issues = "https://github.com/AntonVanAssche/JamJar/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "jamjar.__version__"}
