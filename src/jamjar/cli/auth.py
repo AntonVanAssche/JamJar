@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+CLI command for authenticating with Spotify.
+
+This module handles the Spotify authentication flow, including
+logging in, refreshing the access token, and storing the token.
+"""
+
 import json
 import os
 import urllib.parse
@@ -15,6 +22,13 @@ CONFIG = Config()
 
 
 class Auth:
+    """
+    Handles the Spotify authentication flow.
+
+    This includes logging in, refreshing the access token, and
+    storing the token for future use.
+    """
+
     def __init__(self, config: Config):
         self.auth_url = "https://accounts.spotify.com/authorize"
         self.token_url = "https://accounts.spotify.com/api/token"
@@ -27,6 +41,7 @@ class Auth:
     def login(self):
         """Initiates the login flow."""
         try:
+            # pylint: disable=line-too-long
             scope = "user-read-private user-read-email playlist-read-private playlist-read-collaborative"
             params = {
                 "client_id": self.client_id,
@@ -40,15 +55,17 @@ class Auth:
             print("After authorizing, the app will handle the callback and complete authentication.")
             self._start_http_server()
         except Exception as e:
-            print(f"Error initiating login: {e}")
-            raise
+            raise RuntimeError(f"Error during login: {e}") from e
 
     def _start_http_server(self):
         """Starts a local HTTP server to handle the Spotify callback."""
         try:
 
             class CallbackHandler(BaseHTTPRequestHandler):
-                def do_GET(self):
+                """Handles the Spotify callback and exchanges the code for an access token."""
+
+                def do_get(self):
+                    """Handles the GET request from Spotify."""
                     try:
                         query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
                         if "error" in query:
@@ -59,19 +76,21 @@ class Auth:
                             token_info = self.server.auth.get_token(code)
                             self.server.auth.save_token(token_info)
                             print(
-                                f"Authentication complete! You are now logged in as {self.server.auth.display_username(token_info['access_token'])}."
+                                f"Authentication complete! You are now logged in as "
+                                f"{self.server.auth.display_username(token_info['access_token'])}."
                             )
                         self.send_response(200)
                         self.end_headers()
                         self.wfile.write(b"Authentication successful! You can close this window.")
                     except Exception as e:
-                        print(f"Error handling callback: {e}")
                         self.send_response(500)
                         self.end_headers()
-                        raise
+                        raise RuntimeError(f"Error during callback handling: {e}") from e
 
+                # pylint: disable=redefined-builtin
                 def log_message(self, format, *args):
-                    return  # Suppress HTTP server logs
+                    """Suppress log messages."""
+                    return
 
             server = HTTPServer(("localhost", 5000), CallbackHandler)
             server.auth = self  # Pass the Auth instance to the handler
@@ -92,7 +111,7 @@ class Auth:
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
             }
-            response = requests.post(self.token_url, data=body)
+            response = requests.post(self.token_url, data=body, timeout=10)
             response.raise_for_status()  # Raises HTTPError if the response code is 4xx or 5xx
             token_info = response.json()
             token_info["expires_at"] = datetime.now().timestamp() + token_info["expires_in"]
@@ -121,7 +140,7 @@ class Auth:
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
             }
-            response = requests.post(self.token_url, data=body)
+            response = requests.post(self.token_url, data=body, timeout=10)
             response.raise_for_status()
             new_token_info = response.json()
             new_token_info["expires_at"] = datetime.now().timestamp() + new_token_info["expires_in"]
@@ -138,7 +157,7 @@ class Auth:
     def save_token(self, token_info):
         """Saves token info to a file."""
         try:
-            with open(self.token_file, "w") as f:
+            with open(self.token_file, "w", encoding="utf-8") as f:
                 json.dump(token_info, f)
         except Exception as e:
             print(f"Error saving token: {e}")
@@ -149,7 +168,7 @@ class Auth:
         try:
             if not os.path.exists(self.token_file):
                 return None
-            with open(self.token_file, "r") as f:
+            with open(self.token_file, "r", encoding="utf-8") as f:
                 return json.load(f)
         except json.JSONDecodeError as e:
             print(f"Error loading token: {e}")
@@ -171,7 +190,7 @@ class Auth:
         """Fetches and displays the user's username or display name."""
         try:
             headers = {"Authorization": f"Bearer {access_token}"}
-            response = requests.get(f"{self.base_url}/me", headers=headers)
+            response = requests.get(f"{self.base_url}/me", headers=headers, timeout=10)
             response.raise_for_status()
             user_info = response.json()
 
@@ -194,6 +213,7 @@ class Auth:
             if datetime.now().timestamp() > token_info["expires_at"]:
                 print("Access token expired. Run `jamjar --auth` to refresh.")
             else:
+                # pylint: disable=line-too-long
                 print(f"Logged in as {self.display_username(token_info['access_token'])}.")
                 print(f"Access token expires at {datetime.fromtimestamp(token_info['expires_at'])}.")
         except Exception as e:
@@ -203,7 +223,7 @@ class Auth:
     def clean(self, config):
         """Removes the saved access token."""
         try:
-            token_file = os.path.expanduser("~/.jamjar_token.json")
+            token_file = os.path.expanduser(config.token_file)
             if os.path.exists(token_file):
                 os.remove(token_file)
                 print("Access token removed.")
@@ -218,28 +238,24 @@ class Auth:
 @click.help_option("--help", "-h")
 def auth():
     """Manage Spotify authentication."""
-    pass
 
 
 @auth.command()
 @click.help_option("--help", "-h")
 def login():
     """Log in to Spotify."""
-    auth = Auth(CONFIG)
-    auth.login()
+    Auth(CONFIG).login()
 
 
 @auth.command()
 @click.help_option("--help", "-h")
 def status():
     """Display authentication status."""
-    auth = Auth(CONFIG)
-    auth.status()
+    Auth(CONFIG).status()
 
 
 @auth.command()
 @click.help_option("--help", "-h")
 def clean():
     """Remove the saved access token."""
-    auth = Auth(CONFIG)
-    auth.clean(CONFIG)
+    Auth(CONFIG).clean(CONFIG)
