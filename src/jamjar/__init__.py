@@ -7,7 +7,7 @@ This module sets up the CLI commands for adding, removing,
 syncing, exporting, and managing playlists in the JamJar database.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import json
 import os
