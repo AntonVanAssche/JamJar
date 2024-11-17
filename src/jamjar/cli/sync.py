@@ -81,7 +81,7 @@ class SyncManager:
 
         for local_track in local_tracks:
             if local_track[0] not in spotify_track_ids:
-                self.db.delete_track(local_track[0], playlist_id, local_track[2])
+                self.db.delete_track(local_track[0])
                 print(f"Removed track '{local_track[2]}' by '{local_track[3]}' from the database.")
 
 
