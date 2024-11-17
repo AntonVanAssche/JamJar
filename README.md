@@ -208,9 +208,7 @@ The Spotify credentials file (`~/.config/jamjar/config.json`) should contain the
 {
   "client_id": "your-client-id",
   "client_secret": "your-client-secret",
-  "redirect_uri": "http://localhost:5000/callback",
-  "db_path": "~/.local/share/jamjar/jamjar.db",
-  "token_path": "~/.config/jamjar/token.json"
+  "redirect_uri": "http://localhost:5000/callback"
 }
 ```
 
