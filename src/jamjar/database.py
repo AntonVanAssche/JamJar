@@ -50,8 +50,8 @@ class Database:
                 CREATE TABLE IF NOT EXISTS playlists (
                     id TEXT PRIMARY KEY,
                     name TEXT NOT NULL,
-                    owner TEXT NOT NULL,
                     description TEXT,
+                    owner TEXT NOT NULL,
                     url TEXT NOT NULL
                 )
                 """
@@ -210,8 +210,11 @@ class Database:
             with self.connection:
                 return self.connection.execute(
                     """
-                    SELECT * FROM tracks
-                    WHERE playlist_id = ?
+                    SELECT p.name, t.id, t.name, t.artist, t.user_added, t.time_added
+                    FROM tracks t
+                    JOIN playlists p ON t.playlist_id = p.id
+                    WHERE t.playlist_id = ?
+                    ORDER BY p.name, t.id DESC
                     """,
                     (playlist_id,),
                 ).fetchall()
