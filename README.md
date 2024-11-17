@@ -95,6 +95,7 @@ Options:
 Commands:
   add     Add a playlist to the database.
   auth    Manage Spotify authentication.
+  diff    Compares playlist state between database and Spotify.
   export  Export a playlist's data to a JSON file.
   list    List playlists or tracks in a specific playlist.
   remove  Remove a playlist or a specific track from a playlist.
@@ -143,6 +144,25 @@ jamjar add https://open.spotify.com/playlist/playlist_id
 
 ```console
 jamjar add playlist_id
+```
+
+#### `jamjar diff <url|id> [--details]`
+
+Compares the playlist state between the database and Spotify and returns
+it in the JSON format.
+
+```console
+jamjar diff https://open.spotify.com/playlist/playlist_id
+```
+
+```console
+jamjar diff playlist_id
+```
+
+To also show playlist metadata changes, use the `--details` flag:
+
+```console
+jamjar diff playlist_id --details
 ```
 
 #### `jamjar update <url|id>`
