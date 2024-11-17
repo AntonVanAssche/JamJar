@@ -7,6 +7,8 @@ This module handles listing all playlists stored in the JamJar database,
 and listing all tracks in a specific playlist.
 """
 
+import json
+
 import click
 
 from jamjar.config import Config
@@ -35,7 +37,7 @@ class ListManager:
         try:
             playlists = self.db.fetch_playlists()
             if not playlists:
-                print("No playlists found.")
+                print(json.dumps({"message": "No playlists found."}, indent=2))
                 return
 
             headers = ["ID", "Name", "Description", "Owner", "URL"]
@@ -51,7 +53,8 @@ class ListManager:
             playlist_id = extract_playlist_id(playlist_id)
             tracks = self.db.fetch_playlist_tracks(playlist_id)
             if not tracks:
-                print(f"No tracks found for playlist ID {playlist_id}.")
+                # pylint: disable=line-too-long
+                print(json.dumps({"message": f"No tracks found for playlist ID '{playlist_id}'."}, indent=2))
                 return
 
             headers = ["Playlist", "Track ID", "Name", "Artist", "Added by User", "Added on"]
