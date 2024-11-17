@@ -147,6 +147,7 @@ class Auth:
             new_token_info["refresh_token"] = token_info["refresh_token"]
             new_token_info["expires_at"] = datetime.now().timestamp() + new_token_info["expires_in"]
 
+            self.verify_token(new_token_info)
             self.save_token(new_token_info)
 
             return new_token_info
@@ -156,6 +157,20 @@ class Auth:
             raise
         except Exception as e:
             print(f"Error refreshing token: {e}")
+            raise
+
+    def verify_token(self, token_info):
+        """Verifies the validity of the access token."""
+        try:
+            headers = {"Authorization": f"Bearer {token_info['access_token']}"}
+            response = requests.get("https://api.spotify.com/v1/me", headers=headers, timeout=10)
+            if response.status_code != 200:
+                raise RuntimeError("Token verification failed. Please log in again.")
+        except requests.exceptions.RequestException as e:
+            print(f"Error verifying token: {e}")
+            raise
+        except Exception as e:
+            print(f"Error processing token verification response: {e}")
             raise
 
     def save_token(self, token_info):
