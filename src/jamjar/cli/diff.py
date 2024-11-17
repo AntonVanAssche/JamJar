@@ -94,7 +94,7 @@ class DiffManager:
             added_tracks = [track for track in spotify_tracks if track["id"] in added_track_ids]
             removed_tracks = [track for track in db_tracks if track["id"] in removed_track_ids]
 
-            return {"Added": added_tracks, "Removed": removed_tracks}
+            return {"added": added_tracks, "removed": removed_tracks}
         except Exception as e:
             raise RuntimeError(f"Failed to generate diff: {e}") from e
 

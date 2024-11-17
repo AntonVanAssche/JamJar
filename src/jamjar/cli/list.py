@@ -40,8 +40,8 @@ class ListManager:
                 print(json.dumps({"message": "No playlists found."}, indent=2))
                 return
 
-            headers = ["ID", "Name", "Description", "Owner", "URL"]
-            print(format_json_output("Playlists", headers, playlists))
+            headers = ["id", "name", "description", "owner", "url"]
+            print(format_json_output("playlists", headers, playlists))
         except Exception as e:
             raise RuntimeError(f"Failed to list playlists: {e}") from e
 
@@ -57,8 +57,8 @@ class ListManager:
                 print(json.dumps({"message": f"No tracks found for playlist ID '{playlist_id}'."}, indent=2))
                 return
 
-            headers = ["Playlist", "Track ID", "Name", "Artist", "Added by User", "Added on"]
-            print(format_json_output("Tracks", headers, tracks))
+            headers = ["playlist", "track_id", "name", "artist", "added_by_user", "added_on"]
+            print(format_json_output("tracks", headers, tracks))
         except Exception as e:
             raise RuntimeError(f"Failed to list tracks: {e}") from e
 
