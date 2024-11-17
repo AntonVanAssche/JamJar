@@ -144,8 +144,11 @@ class Auth:
             response = requests.post(self.token_url, data=body, timeout=10)
             response.raise_for_status()
             new_token_info = response.json()
+            new_token_info["refresh_token"] = token_info["refresh_token"]
             new_token_info["expires_at"] = datetime.now().timestamp() + new_token_info["expires_in"]
+
             self.save_token(new_token_info)
+
             return new_token_info
 
         except requests.exceptions.RequestException as e:
