@@ -202,15 +202,15 @@ jamjar export playlist_id --output my_playlist.json
 
 ## Configuration
 
-The Spotify credentials file (`~/.jamjar_config.json`) should contain the following:
+The Spotify credentials file (`~/.config/jamjar/config.json`) should contain the following:
 
 ```json
 {
   "client_id": "your-client-id",
   "client_secret": "your-client-secret",
   "redirect_uri": "http://localhost:5000/callback",
-  "db_path": "~/.jamjar.db",
-  "token_path": "~/.jamjar_token.json"
+  "db_path": "~/.local/share/jamjar/jamjar.db",
+  "token_path": "~/.config/jamjar/token.json"
 }
 ```
 

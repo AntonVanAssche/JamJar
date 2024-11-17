@@ -57,7 +57,7 @@ class Config:
             base_dir = Path(os.getenv("APPDATA", r"~/AppData/Roaming")).expanduser()
             return base_dir / "JamJar" / "config.json"
 
-        return Path.home() / ".jamjar_config.json"
+        return Path.home() / ".config" / "jamjar" / "config.json"
 
     @property
     def db_path(self):
@@ -66,7 +66,7 @@ class Config:
             base_dir = Path(os.getenv("APPDATA", r"~/AppData/Roaming")).expanduser()
             return base_dir / "JamJar" / "jamjar.db"
 
-        return Path.home() / ".jamjar.db"
+        return Path.home() / ".local" / "share" / "jamjar" / "jamjar.db"
 
     @property
     def token_file(self):
@@ -75,4 +75,4 @@ class Config:
             base_dir = Path(os.getenv("APPDATA", r"~/AppData/Roaming")).expanduser()
             return base_dir / "JamJar" / "token.json"
 
-        return Path.home() / ".jamjar_token.json"
+        return Path.home() / ".config" / "jamjar" / "token.json"
