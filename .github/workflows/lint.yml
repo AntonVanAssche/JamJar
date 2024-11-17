@@ -5,6 +5,9 @@ on: [push]
 jobs:
   pylint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
 
     strategy:
       matrix:
