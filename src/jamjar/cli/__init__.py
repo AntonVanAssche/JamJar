@@ -12,5 +12,6 @@ from jamjar.cli.auth import auth
 from jamjar.cli.export import export
 from jamjar.cli.list import list as list_command
 from jamjar.cli.remove import remove
+from jamjar.cli.stats import stats
 from jamjar.cli.sync import sync
 from jamjar.cli.update import update

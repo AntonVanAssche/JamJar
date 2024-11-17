@@ -18,6 +18,7 @@ class DatabaseError(Exception):
     """Custom exception for database-related errors."""
 
 
+# pylint: disable=too-many-public-methods
 class Database:
     """
     Handles the database operations for JamJar.
@@ -49,8 +50,8 @@ class Database:
                 CREATE TABLE IF NOT EXISTS playlists (
                     id TEXT PRIMARY KEY,
                     name TEXT NOT NULL,
-                    owner TEXT NOT NULL,
                     description TEXT,
+                    owner TEXT NOT NULL,
                     url TEXT NOT NULL
                 )
                 """
@@ -209,11 +210,172 @@ class Database:
             with self.connection:
                 return self.connection.execute(
                     """
-                    SELECT * FROM tracks
-                    WHERE playlist_id = ?
+                    SELECT p.name, t.id, t.name, t.artist, t.user_added, t.time_added
+                    FROM tracks t
+                    JOIN playlists p ON t.playlist_id = p.id
+                    WHERE t.playlist_id = ?
+                    ORDER BY p.name, t.id DESC
                     """,
                     (playlist_id,),
                 ).fetchall()
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def count_playlists(self) -> int:
+        """Fetch the total number of playlists in the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT COUNT(*) FROM playlists
+                    """
+                ).fetchone()[0]
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def count_tracks(self) -> int:
+        """Fetch the total number of tracks in the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT COUNT(*) FROM tracks
+                    """
+                ).fetchone()[0]
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def count_artists(self) -> int:
+        """Fetch the total number of artists in the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT COUNT(DISTINCT artist) FROM tracks
+                    """
+                ).fetchone()[0]
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def count_users(self) -> int:
+        """Fetch the total number of users who have added tracks to the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT COUNT(DISTINCT user_added) FROM tracks
+                    """
+                ).fetchone()[0]
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_unique_artists(self) -> List[str]:
+        """Fetch a list of unique artists in the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT DISTINCT artist FROM tracks
+                    """
+                ).fetchall()
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_unique_tracks(self) -> List[str]:
+        """Fetch a list of unique tracks in the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT name FROM tracks
+                    """
+                ).fetchall()
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_recently_added_tracks(self, limit: int = 10) -> List[Tuple]:
+        """Fetch the most recently added tracks in the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT * FROM tracks
+                    ORDER BY time_added DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_top_tracks(self, limit: int = 10) -> List[Tuple]:
+        """Fetch the top tracks in the database based on the number of playlists they appear in."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT name, artist, COUNT(*) as occurrences
+                    FROM tracks
+                    GROUP BY name
+                    ORDER BY occurrences DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_top_artists(self, limit: int = 10) -> List[Tuple]:
+        """Fetch the top artists in the database based on the number of playlists their tracks appear in."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT artist, COUNT(playlist_id) AS count
+                    FROM tracks
+                    GROUP BY artist
+                    ORDER BY count DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_top_users(self, limit: int = 3) -> List[Tuple]:
+        """Fetch the top users in the database based on the number of tracks they've added."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT user_added, COUNT(id) AS count
+                    FROM tracks
+                    GROUP BY user_added
+                    ORDER BY count DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_recent_tracks(self, limit: int = 10) -> List[Tuple]:
+        """Fetch the most recently added tracks in the database across all playlists."""
+        try:
+            query = """
+            SELECT p.name, t.name, t.artist, t.user_added, t.time_added
+            FROM tracks t
+            JOIN playlists p ON t.playlist_id = p.id
+            ORDER BY t.time_added DESC
+            LIMIT ?
+            """
+
+            cursor = self.connection.cursor()
+            cursor.execute(query, (limit,))
+            rows = cursor.fetchall()
+            cursor.close()
+
+            return rows
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
