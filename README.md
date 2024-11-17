@@ -98,6 +98,7 @@ Commands:
   export  Export a playlist's data to a JSON file.
   list    List playlists or tracks in a specific playlist.
   remove  Remove a playlist or a specific track from a playlist.
+  stats   Get statistics about the playlists and tracks in the database.
   sync    Synchronize a playlist with Spotify.
   update  Update an existing playlist in the database.
 ```
@@ -198,6 +199,41 @@ Exports a playlist's data to a JSON file.
 
 ```console
 jamjar export playlist_id --output my_playlist.json
+```
+
+### Statistics
+
+#### `jamjar stats [--top-tracks|--top-artists|--top-users|--recent-tracks]`
+
+Some statistics about the playlists and tracks in the database
+returned in the JSON format.
+
+```console
+jamjar stats
+```
+
+Show the top tracks in the database returned in the JSON format.
+
+```console
+jamjar stats --top-tracks
+```
+
+Show the top artists in the database returned in the JSON format.
+
+```console
+jamjar stats --top-artists
+```
+
+Show the top users in the database returned in the JSON format.
+
+```console
+jamjar stats --top-users
+```
+
+Show the most recent tracks in the database returned in the JSON format.
+
+```console
+jamjar stats --recent-tracks
 ```
 
 ## Configuration
