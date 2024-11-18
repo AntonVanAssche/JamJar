@@ -3,15 +3,16 @@
 """
 Handles the database operations for JamJar.
 
-This includes adding, updating, and deleting playlists and tracks, as well as
-fetching playlists and tracks from the database.
+This includes adding, updating, and deleting playlists and spotify_tracks, as well as
+fetching playlists and spotify_tracks from the database.
 """
 
 import sqlite3
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 from jamjar.config import Config
+from jamjar.dataclasses import Playlist, Track
 
 
 class DatabaseError(Exception):
@@ -23,8 +24,8 @@ class Database:
     """
     Handles the database operations for JamJar.
 
-    This includes adding, updating, and deleting playlists and tracks, as well as
-    fetching playlists and tracks from the database.
+    This includes adding, updating, and deleting playlists and spotify_tracks, as well as
+    fetching playlists and spotify_tracks from the database.
     """
 
     def __init__(self, config: Config):
@@ -37,6 +38,7 @@ class Database:
         try:
             if not self.connection:
                 self.connection = sqlite3.connect(self.db_path)
+                self.connection.row_factory = sqlite3.Row
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
@@ -47,61 +49,98 @@ class Database:
             with self.connection:
                 self.connection.execute(
                     """
-                CREATE TABLE IF NOT EXISTS playlists (
-                    id TEXT PRIMARY KEY,
-                    name TEXT NOT NULL,
-                    description TEXT,
-                    owner TEXT NOT NULL,
-                    url TEXT NOT NULL
+                    CREATE TABLE IF NOT EXISTS spotify_playlist (
+                        playlist_id VARCHAR(255) PRIMARY KEY NOT NULL,
+                        playlist_name VARCHAR(255) NOT NULL,
+                        owner_id VARCHAR(255) NOT NULL,
+                        owner_name VARCHAR(255) NOT NULL,
+                        owner_url VARCHAR(255) NOT NULL,
+                        playlist_url VARCHAR(255) NOT NULL,
+                        description TEXT,
+                        public BOOLEAN NOT NULL DEFAULT FALSE,
+                        followers_total INT NOT NULL DEFAULT 0,
+                        snapshot_id VARCHAR(255) NOT NULL,
+                        playlist_image_url VARCHAR(255) NOT NULL,
+                        track_count INT NOT NULL DEFAULT 0,
+                        colaborative BOOLEAN NOT NULL DEFAULT FALSE
+                    );
+                    """
                 )
-                """
-                )
+
+                # pylint: disable=line-too-long
                 self.connection.execute(
                     """
-                CREATE TABLE IF NOT EXISTS tracks (
-                    id TEXT PRIMARY KEY,
-                    playlist_id TEXT NOT NULL,
-                    name TEXT NOT NULL,
-                    artist TEXT NOT NULL,
-                    url TEXT NOT NULL,
-                    user_added TEXT NOT NULL,
-                    time_added TIMESTAMP NOT NULL,
-                    FOREIGN KEY (playlist_id) REFERENCES playlists (id) ON DELETE CASCADE
-                )
-                """
+                    CREATE TABLE IF NOT EXISTS spotify_tracks (
+                        track_id VARCHAR(255) PRIMARY KEY NOT NULL,
+                        track_name VARCHAR(255) NOT NULL,
+                        track_url VARCHAR(255) NOT NULL,
+                        preview_url VARCHAR(255),
+                        track_popularity INT NOT NULL DEFAULT 0,
+                        album_id VARCHAR(255) NOT NULL,
+                        album_name VARCHAR(255) NOT NULL,
+                        album_url VARCHAR(255) NOT NULL,
+                        artist_id VARCHAR(255) NOT NULL,
+                        artist_name VARCHAR(255) NOT NULL,
+                        artist_url VARCHAR(255) NOT NULL,
+                        is_explicit BOOLEAN NOT NULL DEFAULT FALSE,
+                        is_local BOOLEAN NOT NULL DEFAULT FALSE,
+                        disc_number INT NOT NULL DEFAULT 1,
+                        isrc_code VARCHAR(50),
+                        playlist_id VARCHAR(255) NOT NULL,
+                        user_added VARCHAR(255) NOT NULL,
+                        time_added DATETIME NOT NULL,
+                        FOREIGN KEY (playlist_id) REFERENCES spotify_playlist (playlist_id) ON DELETE CASCADE
+                    );
+                    """
                 )
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
-    def add_playlist(self, playlist_id: str, name: str, owner: str, description: str, url: str):
+    def add_playlist(
+        self,
+        playlist_id: str,
+        name: str,
+        owner_id: str,
+        owner_name: str,
+        owner_url: str,
+        description: str,
+        url: str,
+        snapshot_id: str,
+        playlist_image_url: str,
+        followers_total: int = 0,
+        track_count: int = 0,
+        public: bool = False,
+        colaborative: bool = False,
+    ):
         """Add a playlist to the database."""
         try:
             with self.connection:
                 self.connection.execute(
                     """
-                    INSERT OR REPLACE INTO playlists (id, name, owner, description, url)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT OR REPLACE INTO spotify_playlist (
+                        playlist_id, playlist_name, owner_id, owner_name, owner_url,
+                        description, playlist_url, public, followers_total,
+                        snapshot_id, playlist_image_url, track_count, colaborative
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-                    (playlist_id, name, owner, description, url),
-                )
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
-    # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-positional-arguments
-    def update_playlist(self, playlist_id: str, name: str, owner: str, description: str, url: str):
-        """Update an existing playlist."""
-        try:
-            with self.connection:
-                self.connection.execute(
-                    """
-                    UPDATE playlists
-                    SET name = ?, owner = ?, description = ?, url = ?
-                    WHERE id = ?
-                    """,
-                    (playlist_id, name, owner, description, url),
+                    (
+                        playlist_id,
+                        name,
+                        owner_id,
+                        owner_name,
+                        owner_url,
+                        description,
+                        url,
+                        public,
+                        followers_total,
+                        snapshot_id,
+                        playlist_image_url,
+                        track_count,
+                        colaborative,
+                    ),
                 )
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
@@ -109,51 +148,110 @@ class Database:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     # pylint: disable=line-too-long
+    # pylint: disable=too-many-locals
     def add_track(
-        self, playlist_id: str, track_id: str, name: str, artist: str, url: str, user_added: str, time_added: str
+        self,
+        track_id: str,
+        track_name: str,
+        track_url: str,
+        preview_url: str,
+        track_popularity: int,
+        album_id: str,
+        album_name: str,
+        album_url: str,
+        artist_id: str,
+        artist_name: str,
+        artist_url: str,
+        is_explicit: bool,
+        is_local: bool,
+        disc_number: int,
+        isrc_code: str,
+        playlist_id: str,
+        user_added: str,
+        time_added: str,
     ):
         """Add a track to the database."""
         try:
             with self.connection:
-                # pylint: disable=line-too-long
                 self.connection.execute(
                     """
-                    INSERT OR REPLACE INTO tracks (id, playlist_id, name, artist, url, user_added, time_added)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT OR REPLACE INTO spotify_tracks (
+                        track_id,
+                        track_name,
+                        track_url,
+                        preview_url,
+                        track_popularity,
+                        album_id,
+                        album_name,
+                        album_url,
+                        artist_id,
+                        artist_name,
+                        artist_url,
+                        is_explicit,
+                        is_local,
+                        disc_number,
+                        isrc_code,
+                        playlist_id,
+                        user_added,
+                        time_added
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-                    (track_id, playlist_id, name, artist, url, user_added, time_added),
+                    (
+                        track_id,
+                        track_name,
+                        track_url,
+                        preview_url,
+                        track_popularity,
+                        album_id,
+                        album_name,
+                        album_url,
+                        artist_id,
+                        artist_name,
+                        artist_url,
+                        bool(is_explicit),
+                        bool(is_local),
+                        disc_number,
+                        isrc_code,
+                        playlist_id,
+                        user_added,
+                        time_added,
+                    ),
                 )
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def delete_track(self, track_id: str):
+    def delete_track(self, track_id: str, playlist_id: str):
         """Delete a track from the database."""
         try:
             with self.connection:
                 self.connection.execute(
                     """
-                    DELETE FROM tracks
-                    WHERE id = ?
+                    DELETE FROM spotify_tracks
+                    WHERE track_id = ? AND playlist_id = ?
                     """,
-                    (track_id,),
+                    (
+                        track_id,
+                        playlist_id,
+                    ),
                 )
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
     def delete_playlist(self, playlist_id: str):
-        """Delete a playlist and its tracks from the database."""
+        """Delete a playlist and its spotify_tracks from the database."""
         try:
             with self.connection:
                 self.connection.execute(
                     """
-                    DELETE FROM playlists
-                    WHERE id = ?
+                    DELETE FROM spotify_playlist
+                    WHERE playlist_id = ?
                     """,
                     (playlist_id,),
                 )
                 self.connection.execute(
                     """
-                    DELETE FROM tracks
+                    DELETE FROM spotify_tracks
                     WHERE playlist_id = ?
                     """,
                     (playlist_id,),
@@ -162,62 +260,172 @@ class Database:
             raise DatabaseError(e) from e
 
     def delete_all_playlists(self):
-        """Delete all playlists and their tracks from the database."""
+        """Delete all playlists and their spotify_tracks from the database."""
         try:
             with self.connection:
                 self.connection.execute(
                     """
-                    DELETE FROM playlists
+                    DELETE FROM spotify_playlist
                     """
                 )
                 self.connection.execute(
                     """
-                    DELETE FROM tracks
+                    DELETE FROM spotify_tracks
                     """
                 )
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_playlists(self) -> List[Tuple]:
+    def fetch_playlists(self) -> List[Playlist]:
         """Fetch all playlists from the database."""
         try:
             with self.connection:
-                return self.connection.execute(
+                rows = self.connection.execute(
                     """
-                    SELECT * FROM playlists
+                    SELECT * FROM spotify_playlist
                     """
                 ).fetchall()
+
+                playlists = []
+                for row in rows:
+                    playlist = Playlist(
+                        playlist_id=row["playlist_id"],
+                        playlist_name=row["playlist_name"],
+                        owner_id=row["owner_id"],
+                        owner_name=row["owner_name"],
+                        owner_url=row["owner_url"],
+                        description=row["description"],
+                        playlist_url=row["playlist_url"],
+                        public=bool(row["public"]),
+                        followers_total=row["followers_total"],
+                        snapshot_id=row["snapshot_id"],
+                        playlist_image_url=row["playlist_image_url"],
+                        track_count=row["track_count"],
+                        colaborative=bool(row["colaborative"]),
+                    )
+                    playlists.append(playlist)
+                return playlists
+
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_playlist_by_id(self, playlist_id: str) -> List[Tuple]:
+    def fetch_playlist_by_id(self, playlist_id: str) -> Playlist:
         """Fetch a specific playlist specified by the id."""
         try:
             with self.connection:
-                return self.connection.execute(
+                row = self.connection.execute(
                     """
-                    SELECT * FROM playlists
-                    WHERE id = ?
+                    SELECT * FROM spotify_playlist
+                    WHERE playlist_id = ?
                     """,
                     (playlist_id,),
-                ).fetchall()
+                ).fetchone()
+
+                if row:
+                    playlist = Playlist(
+                        playlist_id=row["playlist_id"],
+                        playlist_name=row["playlist_name"],
+                        owner_id=row["owner_id"],
+                        owner_name=row["owner_name"],
+                        owner_url=row["owner_url"],
+                        description=row["description"],
+                        playlist_url=row["playlist_url"],
+                        public=bool(row["public"]),
+                        followers_total=row["followers_total"],
+                        snapshot_id=row["snapshot_id"],
+                        playlist_image_url=row["playlist_image_url"],
+                        track_count=row["track_count"],
+                        colaborative=bool(row["colaborative"]),
+                    )
+                    return playlist
+
+                return None
+
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_playlist_tracks(self, playlist_id: str) -> List[Tuple]:
-        """Fetch all tracks for a specific playlist."""
+    def fetch_track_by_id(self, playlist_id: str, track_id: str) -> Track:
+        """Fetch a specific playlist specified by the id."""
         try:
             with self.connection:
-                return self.connection.execute(
+                row = self.connection.execute(
                     """
-                    SELECT p.name, t.id, t.name, t.artist, t.user_added, t.time_added
-                    FROM tracks t
-                    JOIN playlists p ON t.playlist_id = p.id
-                    WHERE t.playlist_id = ?
-                    ORDER BY p.name, t.id DESC
+                    SELECT * FROM spotify_tracks
+                    WHERE track_id = ? AND playlist_id = ?
+                    """,
+                    (
+                        track_id,
+                        playlist_id,
+                    ),
+                ).fetchone()
+
+                if row:
+                    track = Track(
+                        track_id=row["track_id"],
+                        track_name=row["track_name"],
+                        track_url=row["track_url"],
+                        preview_url=row["preview_url"],
+                        track_popularity=row["track_popularity"],
+                        album_id=row["album_id"],
+                        album_name=row["album_name"],
+                        album_url=row["album_url"],
+                        artist_id=row["artist_id"],
+                        artist_name=row["artist_name"],
+                        artist_url=row["artist_url"],
+                        is_explicit=bool(row["is_explicit"]),
+                        is_local=bool(row["is_local"]),
+                        disc_number=row["disc_number"],
+                        isrc_code=row["isrc_code"],
+                        playlist_id=row["playlist_id"],
+                        user_added=row["user_added"],
+                        time_added=row["time_added"],
+                    )
+                    return track
+
+                return None
+
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
+
+    def fetch_playlist_tracks(self, playlist_id: str) -> List[Track]:
+        """Fetch all spotify_tracks for a specific playlist."""
+        try:
+            with self.connection:
+                rows = self.connection.execute(
+                    """
+                    SELECT *
+                    FROM spotify_tracks
+                    WHERE playlist_id = ?
+                    ORDER BY track_id DESC
                     """,
                     (playlist_id,),
                 ).fetchall()
+
+                spotify_tracks = []
+                for row in rows:
+                    track = Track(
+                        track_id=row["track_id"],
+                        track_name=row["track_name"],
+                        track_url=row["track_url"],
+                        preview_url=row["preview_url"],
+                        track_popularity=row["track_popularity"],
+                        album_id=row["album_id"],
+                        album_name=row["album_name"],
+                        album_url=row["album_url"],
+                        artist_id=row["artist_id"],
+                        artist_name=row["artist_name"],
+                        artist_url=row["artist_url"],
+                        is_explicit=bool(row["is_explicit"]),
+                        is_local=bool(row["is_local"]),
+                        disc_number=row["disc_number"],
+                        isrc_code=row["isrc_code"],
+                        playlist_id=row["playlist_id"],
+                        user_added=row["user_added"],
+                        time_added=row["time_added"],
+                    )
+                    spotify_tracks.append(track)
+                return spotify_tracks
+
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
@@ -227,19 +435,19 @@ class Database:
             with self.connection:
                 return self.connection.execute(
                     """
-                    SELECT COUNT(*) FROM playlists
+                    SELECT COUNT(*) FROM spotify_playlist
                     """
                 ).fetchone()[0]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
     def count_tracks(self) -> int:
-        """Fetch the total number of tracks in the database."""
+        """Fetch the total number of spotify_tracks in the database."""
         try:
             with self.connection:
                 return self.connection.execute(
                     """
-                    SELECT COUNT(*) FROM tracks
+                    SELECT COUNT(*) FROM spotify_tracks
                     """
                 ).fetchone()[0]
         except sqlite3.Error as e:
@@ -251,19 +459,19 @@ class Database:
             with self.connection:
                 return self.connection.execute(
                     """
-                    SELECT COUNT(DISTINCT artist) FROM tracks
+                    SELECT COUNT(DISTINCT artist_name) FROM spotify_tracks
                     """
                 ).fetchone()[0]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
     def count_users(self) -> int:
-        """Fetch the total number of users who have added tracks to the database."""
+        """Fetch the total number of users who have added spotify_tracks to the database."""
         try:
             with self.connection:
                 return self.connection.execute(
                     """
-                    SELECT COUNT(DISTINCT user_added) FROM tracks
+                    SELECT COUNT(DISTINCT user_added) FROM spotify_tracks
                     """
                 ).fetchone()[0]
         except sqlite3.Error as e:
@@ -273,11 +481,14 @@ class Database:
         """Fetch a list of unique artists in the database."""
         try:
             with self.connection:
-                return self.connection.execute(
-                    """
-                    SELECT DISTINCT artist FROM tracks
-                    """
-                ).fetchall()
+                return [
+                    row[0]
+                    for row in self.connection.execute(
+                        """
+                        SELECT DISTINCT artist_name FROM spotify_tracks
+                        """
+                    ).fetchall()
+                ]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
@@ -285,97 +496,146 @@ class Database:
         """Fetch a list of unique tracks in the database."""
         try:
             with self.connection:
-                return self.connection.execute(
-                    """
-                    SELECT name FROM tracks
-                    """
-                ).fetchall()
+                return [
+                    row[0]
+                    for row in self.connection.execute(
+                        """
+                        SELECT track_name FROM spotify_tracks
+                        """
+                    ).fetchall()
+                ]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_recently_added_tracks(self, limit: int = 10) -> List[Tuple]:
-        """Fetch the most recently added tracks in the database."""
+    def fetch_recently_added_tracks(self, limit: int = 10) -> List[dict]:
+        """Fetch the most recently added spotify_tracks in the database."""
         try:
             with self.connection:
-                return self.connection.execute(
+                rows = self.connection.execute(
                     """
-                    SELECT * FROM tracks
-                    ORDER BY time_added DESC
+                    SELECT t.track_name, t.artist_name, t.user_added, t.time_added, p.playlist_name
+                    FROM spotify_tracks t
+                    JOIN spotify_playlist p ON t.playlist_id = p.playlist_id
+                    ORDER BY t.time_added DESC
                     LIMIT ?
                     """,
                     (limit,),
                 ).fetchall()
+
+                return [
+                    {
+                        "track_name": row[0],
+                        "artist_name": row[1],
+                        "user_added": row[2],
+                        "time_added": row[3],
+                        "playlist_name": row[4],
+                    }
+                    for row in rows
+                ]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_top_tracks(self, limit: int = 10) -> List[Tuple]:
-        """Fetch the top tracks in the database based on the number of playlists they appear in."""
+    def fetch_top_tracks(self, limit: int = 10) -> List[dict]:
+        """Fetch the top spotify_tracks in the database based on the number of playlists they appear in."""
         try:
             with self.connection:
-                return self.connection.execute(
+                rows = self.connection.execute(
                     """
-                    SELECT name, artist, COUNT(*) as occurrences
-                    FROM tracks
-                    GROUP BY name
+                    SELECT track_name, artist_name, COUNT(*) as occurrences
+                    FROM spotify_tracks
+                    GROUP BY track_name, artist_name
                     ORDER BY occurrences DESC
                     LIMIT ?
                     """,
                     (limit,),
                 ).fetchall()
+
+                return [
+                    {
+                        "track_name": row[0],
+                        "artist_name": row[1],
+                        "occurrences": row[2],
+                    }
+                    for row in rows
+                ]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_top_artists(self, limit: int = 10) -> List[Tuple]:
+    def fetch_top_artists(self, limit: int = 10) -> List[dict]:
         """Fetch the top artists in the database based on the number of playlists their tracks appear in."""
         try:
             with self.connection:
-                return self.connection.execute(
+                rows = self.connection.execute(
                     """
-                    SELECT artist, COUNT(playlist_id) AS count
-                    FROM tracks
-                    GROUP BY artist
-                    ORDER BY count DESC
+                    SELECT artist_name, COUNT(*) as occurrences
+                    FROM spotify_tracks
+                    GROUP BY artist_name
+                    ORDER BY occurrences DESC
                     LIMIT ?
                     """,
                     (limit,),
                 ).fetchall()
+
+                return [
+                    {
+                        "artist_name": row[0],
+                        "occurrences": row[1],
+                    }
+                    for row in rows
+                ]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_top_users(self, limit: int = 3) -> List[Tuple]:
-        """Fetch the top users in the database based on the number of tracks they've added."""
+    def fetch_top_users(self, limit: int = 3) -> List[dict]:
+        """Fetch the top users in the database based on the number of spotify_tracks they've added."""
         try:
             with self.connection:
-                return self.connection.execute(
+                rows = self.connection.execute(
                     """
-                    SELECT user_added, COUNT(id) AS count
-                    FROM tracks
+                    SELECT user_added, COUNT(track_id) AS count
+                    FROM spotify_tracks
                     GROUP BY user_added
                     ORDER BY count DESC
                     LIMIT ?
                     """,
                     (limit,),
                 ).fetchall()
+
+                return [
+                    {
+                        "user_added": row[0],
+                        "count": row[1],
+                    }
+                    for row in rows
+                ]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_recent_tracks(self, limit: int = 10) -> List[Tuple]:
-        """Fetch the most recently added tracks in the database across all playlists."""
+    def fetch_recent_tracks(self, limit: int = 10) -> List[dict]:
+        """Fetch the most recently added spotify_tracks in the database across all playlists."""
         try:
-            query = """
-            SELECT p.name, t.name, t.artist, t.user_added, t.time_added
-            FROM tracks t
-            JOIN playlists p ON t.playlist_id = p.id
-            ORDER BY t.time_added DESC
-            LIMIT ?
-            """
+            with self.connection:
+                rows = self.connection.execute(
+                    """
+                    SELECT p.name, t.name, t.artist, t.user_added, t.time_added
+                    FROM spotify_tracks t
+                    JOIN playlists p ON t.playlist_id = p.id
+                    ORDER BY t.time_added DESC
+                    LIMIT ?
+                    """,
+                    (limit,),
+                ).fetchall()
 
-            cursor = self.connection.cursor()
-            cursor.execute(query, (limit,))
-            rows = cursor.fetchall()
-            cursor.close()
-
-            return rows
+                return [
+                    {
+                        "playlist_name": row[0],
+                        "track_name": row[1],
+                        "artist_name": row[2],
+                        "user_added": row[3],
+                        "time_added": row[4],
+                    }
+                    for row in rows
+                ]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 

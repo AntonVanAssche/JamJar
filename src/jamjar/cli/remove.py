@@ -34,14 +34,13 @@ class RemoveManager:
         try:
             playlist = self.db.fetch_playlist_by_id(playlist_id)
             if not playlist:
-                print(f"Playlist with ID '{playlist_id}' not found.")
+                print(f"Playlist with ID '{playlist_id.playlist_id}' not found.")
                 return
 
             print(f"Removing playlist with ID {playlist_id}...")
 
-            playlist_name = playlist[0][1]
             self.db.delete_playlist(playlist_id)
-            print(f"Playlist '{playlist_name}' (ID: {playlist_id}) removed successfully.")
+            print(f"Playlist '{playlist.playlist_name}' (ID: {playlist_id}) removed successfully.")
         except Exception as e:
             raise RuntimeError(f"Failed to remove playlist: {e}") from e
 
@@ -56,8 +55,10 @@ class RemoveManager:
                 return
 
             # pylint: disable=line-too-long
-            self.db.delete_track(track_id, playlist_id, track[3])
-            print(f"Track '{track[2]}' by '{track[3]}' removed from playlist '{playlist_id}' successfully.")
+            self.db.delete_track(track_id, playlist_id)
+            print(
+                f"Track '{track.track_name}' by '{track.artist_name}' removed from playlist '{playlist_id}' successfully."
+            )
         except Exception as e:
             raise RuntimeError(f"Failed to remove track: {e}") from e
 

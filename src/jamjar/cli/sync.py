@@ -43,6 +43,8 @@ class SyncManager:
           Spotify playlist.
         """
         try:
+            # pylint: disable=duplicate-code
+            add_manager = AddManager(self.db, self.spotify_api)
             playlist_id = extract_playlist_id(playlist_identifier)
             print(f"Syncing playlist with ID {playlist_id}...")
 
@@ -55,20 +57,16 @@ class SyncManager:
                 AddManager(self.db, self.spotify_api).add_playlist(playlist_id)
                 return
 
-            name = spotify_playlist.get("name", "Unknown Playlist")
-            owner = spotify_playlist.get("owner", {}).get("id", "Unknown User")
-            description = spotify_playlist.get("description", "")
-            url = spotify_playlist["external_urls"]["spotify"]
-            self.db.update_playlist(playlist_id, name, owner, description, url)
-            print(f"Synchronizing playlist '{name}' metadata in the database.")
-
+            action = "Synced"
+            playlist_data = self.spotify_api.get_playlist(playlist_id)
             tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
-            add_manager = AddManager(self.db, self.spotify_api)
-            add_manager.add_tracks(self.db, playlist_id, tracks_data, action="Synced")
+
+            add_manager.add_playlist_to_db(playlist_id, playlist_data, action)
+            add_manager.add_tracks_to_db(playlist_id, tracks_data, action)
 
             self._remove_deleted_tracks(playlist_id, tracks_data)
 
-            print(f"Synchronization complete for playlist '{name}'.")
+            print(f"Synchronization complete for playlist '{playlist_data.get("name")}'.")
         except Exception as e:
             raise RuntimeError(f"Failed to sync playlist: {e}") from e
 
@@ -76,13 +74,21 @@ class SyncManager:
         """
         Removes tracks from the database that are no longer in the Spotify playlist.
         """
-        spotify_track_ids = {item["track"]["id"] for item in spotify_tracks["items"]}
-        local_tracks = self.db.fetch_playlist_tracks(playlist_id)
+        try:
+            spotify_track_ids = {item["track"]["id"] for item in spotify_tracks["items"]}
+            local_tracks = self.db.fetch_playlist_tracks(playlist_id)
 
-        for local_track in local_tracks:
-            if local_track[0] not in spotify_track_ids:
-                self.db.delete_track(local_track[0])
-                print(f"Removed track '{local_track[2]}' by '{local_track[3]}' from the database.")
+            for local_track in local_tracks:
+                if local_track.track_id not in spotify_track_ids:
+                    self.db.delete_track(local_track.track_id, playlist_id)
+
+                    local_track_name = local_track.track_name
+                    local_track_artist = local_track.artist_name
+
+                    # pylint: disable=line-too-long
+                    print(f"Removed track '{local_track_name}' by '{local_track_artist}' from the database.")
+        except Exception as e:
+            raise RuntimeError(f"Failed to remove deleted tracks: {e}") from e
 
 
 @click.command()

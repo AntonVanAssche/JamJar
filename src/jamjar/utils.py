@@ -5,6 +5,7 @@ Module for utility functions used in the JamJar CLI.
 """
 
 import json
+from typing import List
 
 
 def extract_playlist_id(playlist_identifier):
@@ -16,7 +17,7 @@ def extract_playlist_id(playlist_identifier):
     return playlist_identifier
 
 
-def format_json_output(title, headers, rows):
+def format_json_output(entity_name: str, headers: List[str], data: List[dict]) -> str:
     """
     Format the given data into a JSON object with a custom structure.
 
@@ -25,6 +26,8 @@ def format_json_output(title, headers, rows):
     :param rows: List of rows (each row is a tuple of column values).
     :return: JSON-formatted string of the data.
     """
-    formatted_rows = [dict(zip(headers, row)) for row in rows]
-    result = {title: formatted_rows}
-    return json.dumps(result, indent=2)
+    json_data = {entity_name: []}
+    for item in data:
+        json_data[entity_name].append({header: item.get(header, "") for header in headers})
+
+    return json.dumps(json_data, indent=2)
