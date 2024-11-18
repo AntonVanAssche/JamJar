@@ -49,7 +49,7 @@ For further instructions, visit the PackageCloud repository:
 1. Clone the repository:
 
    ```console
-   git clone https://github.com/your-repo/jamjar.git
+   git clone https://github.com/AntonVanAssche/jamjar.git
    cd jamjar
    ```
 
@@ -69,7 +69,7 @@ For further instructions, visit the PackageCloud repository:
 
 4. Set up your Spotify credentials:
    - Create a Spotify app at [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/).
-   - Add your `client_id` and `client_secret` to `~/.jamjar_config.json`:
+   - Add your `client_id` and `client_secret` to `~/.config/jamjar/config.json`:
 
      ```json
      {
