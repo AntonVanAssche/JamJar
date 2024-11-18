@@ -8,11 +8,12 @@ recent tracks in the database. When no options are provided, general statistics
 such as the total number of playlists, tracks, artists, and users are displayed.
 """
 
+import json
+
 import click
 
 from jamjar.config import Config
 from jamjar.database import Database
-from jamjar.utils import format_json_output
 
 CONFIG = Config()
 
@@ -30,33 +31,29 @@ class StatsManager:
         """
         Get the top tracks in the database and display them.
         """
-        top_tracks = self.db.fetch_top_tracks()
-        headers = ["Track", "Artist", "Occurrences"]
-        print(format_json_output("Top Tracks", headers, top_tracks))
+        data = self.db.fetch_top_tracks()
+        print(json.dumps({"top_tracks": data}, indent=2))
 
     def get_top_artists(self):
         """
         Get the top artists in the database and display them.
         """
-        top_artists = self.db.fetch_top_artists()
-        headers = ["Artist", "Amount"]
-        print(format_json_output("Top Artists", headers, top_artists))
+        data = self.db.fetch_top_artists()
+        print(json.dumps({"top_artists": data}, indent=2))
 
     def get_top_users(self):
         """
         Get the top users in the database and display them.
         """
-        top_users = self.db.fetch_top_users()
-        headers = ["User", "Tracks"]
-        print(format_json_output("Top Users", headers, top_users))
+        data = self.db.fetch_top_users()
+        print(json.dumps({"top_users": data}, indent=2))
 
     def get_recent_tracks(self):
         """
         Get the most recent tracks in the database and display them.
         """
-        recent_tracks = self.db.fetch_recent_tracks()
-        headers = ["Playlist", "Track", "Artist", "Added by User"]
-        print(format_json_output("Recent Tracks", headers, recent_tracks))
+        data = self.db.fetch_recent_tracks()
+        print(json.dumps({"recent_tracks": data}, indent=2))
 
     def get_stats(self):
         """
@@ -66,10 +63,13 @@ class StatsManager:
         total_tracks = self.db.count_tracks()
         total_artists = self.db.count_artists()
         total_users = self.db.count_users()
-
-        headers = ["Total Playlists", "Total Tracks", "Total Artists", "Total Users"]
-        rows = [[total_playlists, total_tracks, total_artists, total_users]]
-        print(format_json_output("Database Statistics", headers, rows))
+        json_data = {
+            "total_playlists": total_playlists,
+            "total_tracks": total_tracks,
+            "total_artists": total_artists,
+            "total_users": total_users,
+        }
+        print(json.dumps(json_data, indent=2))
 
 
 @click.command()

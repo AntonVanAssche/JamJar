@@ -12,6 +12,7 @@ import click
 from jamjar.cli.auth import Auth
 from jamjar.config import Config
 from jamjar.database import Database
+from jamjar.dataclasses import Track
 from jamjar.spotify import SpotifyAPI
 from jamjar.utils import extract_playlist_id
 
@@ -30,49 +31,52 @@ class DiffManager:
         self.db = db
         self.spotify_api = spotify_api
 
-    def _fetch_spotify_playlist_tracks(self, playlist_id):
+    def _fetch_spotify_playlist_tracks(self, playlist_id: str):
         """
         Fetch all tracks from a Spotify playlist.
         :param playlist_id: Spotify playlist ID.
-        :return: List of track data as tuples (track_id, name, artist).
+        :return: List of Track objects from Spotify.
         """
         try:
             response = self.spotify_api.get_playlist_tracks(playlist_id)
             items = response.get("items", [])
-            tracks = [
-                {
-                    "id": item["track"]["id"],
-                    "name": item["track"]["name"],
-                    "artist": item["track"]["artists"][0]["name"],
-                    "added_by": item["added_by"]["id"],
-                    "added_on": item["added_at"],
-                }
-                for item in items
-            ]
+            tracks = []
 
+            # pylint: disable=line-too-long
+            for item in items:
+                track = Track(
+                    track_id=item["track"]["id"],
+                    track_name=item["track"]["name"],
+                    track_url=item["track"]["external_urls"].get("spotify", None),
+                    preview_url=item["track"].get("preview_url"),
+                    track_popularity=item["track"]["popularity"],
+                    album_id=item["track"]["album"]["id"],
+                    album_name=item["track"]["album"]["name"],
+                    album_url=item["track"]["album"].get("external_urls", {}).get("spotify", None),
+                    artist_id=item["track"]["artists"][0]["id"],
+                    artist_name=item["track"]["artists"][0]["name"],
+                    artist_url=item["track"]["artists"][0].get("external_urls", {}).get("spotify", None),
+                    is_explicit=item["track"]["explicit"],
+                    is_local=item["track"].get("is_local", False),
+                    disc_number=item["track"].get("disc_number", 1),
+                    isrc_code=item["track"].get("external_ids", {}).get("isrc", ""),
+                    playlist_id=playlist_id,
+                    user_added=item.get("added_by", {}).get("id", ""),
+                    time_added=item["added_at"],
+                )
+                tracks.append(track)
             return tracks
         except Exception as e:
             raise RuntimeError(f"Failed to fetch Spotify playlist tracks: {e}") from e
 
-    def _fetch_database_playlist_tracks(self, playlist_id):
+    def _fetch_database_playlist_tracks(self, playlist_id: str):
         """
         Fetch all tracks from a playlist stored in the database.
         :param playlist_id: Playlist ID.
-        :return: List of track data as dictionaries (track_id, name, artist).
+        :return: List of Track objects from the database.
         """
         try:
             db_tracks = self.db.fetch_playlist_tracks(playlist_id)
-            db_tracks = [
-                {
-                    "id": track[1],
-                    "name": track[2],
-                    "artist": track[3],
-                    "added_by": track[4],
-                    "added_on": track[5],
-                }
-                for track in db_tracks
-            ]
-
             return db_tracks
         except Exception as e:
             raise RuntimeError(f"Failed to fetch database playlist tracks: {e}") from e
@@ -80,38 +84,41 @@ class DiffManager:
     def _generate_diff_json(self, db_tracks, spotify_tracks):
         """
         Generate a JSON-like diff between two track lists.
-        :param db_tracks: List of tracks from the database.
-        :param spotify_tracks: List of tracks from Spotify.
+        :param db_tracks: List of Track objects from the database.
+        :param spotify_tracks: List of Track objects from Spotify.
         :return: JSON diff with 'added' and 'removed' sections.
         """
         try:
-            db_track_ids = {track["id"] for track in db_tracks}
-            spotify_track_ids = {track["id"] for track in spotify_tracks}
+            db_track_ids = {track.track_id for track in db_tracks}
+            spotify_track_ids = {track.track_id for track in spotify_tracks}
 
             added_track_ids = spotify_track_ids - db_track_ids
             removed_track_ids = db_track_ids - spotify_track_ids
 
-            added_tracks = [track for track in spotify_tracks if track["id"] in added_track_ids]
-            removed_tracks = [track for track in db_tracks if track["id"] in removed_track_ids]
+            added_tracks = [track for track in spotify_tracks if track.track_id in added_track_ids]
+            removed_tracks = [track for track in db_tracks if track.track_id in removed_track_ids]
 
-            return {"added": added_tracks, "removed": removed_tracks}
+            return {
+                "added": [track.__dict__ for track in added_tracks],
+                "removed": [track.__dict__ for track in removed_tracks],
+            }
         except Exception as e:
             raise RuntimeError(f"Failed to generate diff: {e}") from e
 
     def _generate_playlist_metadata_diff(self, db_playlist, spotify_playlist):
         """
         Generate a JSON-like diff for metadata differences between two playlists.
-        :param db_playlist: Playlist metadata from the database.
+        :param db_playlist: Playlist object from the database.
         :param spotify_playlist: Playlist metadata from Spotify.
         :return: JSON diff with 'metadata_changed' section.
         """
         try:
             db_values = {
-                "id": db_playlist[0][0],
-                "name": db_playlist[0][1],
-                "description": db_playlist[0][2],
-                "owner": db_playlist[0][3],
-                "url": db_playlist[0][4],
+                "id": db_playlist.playlist_id,
+                "name": db_playlist.playlist_name,
+                "description": db_playlist.description,
+                "owner": db_playlist.owner_name,
+                "url": db_playlist.playlist_url,
             }
 
             spotify_values = {
@@ -123,8 +130,7 @@ class DiffManager:
             }
 
             metadata_diff = {}
-            for item in db_values.items():
-                key, value = item
+            for key, value in db_values.items():
                 if value != spotify_values[key]:
                     metadata_diff[key] = {"db": value, "spotify": spotify_values[key]}
 
@@ -154,13 +160,15 @@ class DiffManager:
         """
         try:
             playlist_id = extract_playlist_id(playlist_identifier)
+            db_playlist = self.db.fetch_playlist_by_id(playlist_id)
+            spotify_playlist = self.spotify_api.get_playlist(playlist_id)
+
             db_tracks = self._fetch_database_playlist_tracks(playlist_id)
             spotify_tracks = self._fetch_spotify_playlist_tracks(playlist_id)
+
             _diff = self._generate_diff_json(db_tracks, spotify_tracks)
 
             if detailed:
-                db_playlist = self.db.fetch_playlist_by_id(playlist_id)
-                spotify_playlist = self.spotify_api.get_playlist(playlist_id)
                 metadata_diff = self._generate_playlist_metadata_diff(db_playlist, spotify_playlist)
                 _diff.update(metadata_diff)
 

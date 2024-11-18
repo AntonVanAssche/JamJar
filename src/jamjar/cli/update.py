@@ -39,21 +39,20 @@ class UpdateManager:
         Accepts either a full Spotify playlist URL or just a playlist ID.
         """
         try:
+            # pylint: disable=duplicate-code
+            add_manager = AddManager(self.db, self.spotify_api)
             playlist_id = extract_playlist_id(playlist_identifier)
             print(f"Updating playlist with ID {playlist_id}...")
 
+            action = "Updated"
             playlist_data = self.spotify_api.get_playlist(playlist_id)
-            name = playlist_data.get("name", "Unknown Playlist")
-            owner = playlist_data.get("owner", {}).get("id", "Unknown User")
-            description = playlist_data.get("description", "")
-            url = playlist_data["external_urls"]["spotify"]
-            self.db.update_playlist(playlist_id, name, owner, description, url)
-
             tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
-            add_manager = AddManager(self.db, self.spotify_api)
-            add_manager.add_tracks(self.db, playlist_id, tracks_data, action="Updated")
 
-            print(f"Playlist '{name}' updated successfully.")
+            add_manager.add_playlist_to_db(playlist_id, playlist_data, action)
+            add_manager.add_tracks_to_db(playlist_id, tracks_data, action)
+
+            # pylint: disable=line-too-long
+            print(f"Playlist '{playlist_data.get("name", "Unknown Playlist")}' updated successfully.")
         except Exception as e:
             raise RuntimeError(f"Failed to update playlist: {e}") from e
 
