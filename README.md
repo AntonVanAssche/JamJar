@@ -49,7 +49,7 @@ For further instructions, visit the PackageCloud repository:
 1. Clone the repository:
 
    ```console
-   git clone https://github.com/your-repo/jamjar.git
+   git clone https://github.com/AntonVanAssche/jamjar.git
    cd jamjar
    ```
 
