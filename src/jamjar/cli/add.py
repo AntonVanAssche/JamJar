@@ -48,6 +48,7 @@ class AddManager:
 
             track_name = track_item["track"]["name"]
             track_url = track_item["track"]["external_urls"]["spotify"]
+            track_uri = track_item["track"]["uri"]
             preview_url = track_item["track"].get("preview_url", "")
             track_popularity = track_item["track"].get("popularity", 0)
             album_id = track_item["track"]["album"]["id"]
@@ -67,6 +68,7 @@ class AddManager:
                 track_id,
                 track_name,
                 track_url,
+                track_uri,
                 preview_url,
                 track_popularity,
                 album_id,

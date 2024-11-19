@@ -48,6 +48,7 @@ class DiffManager:
                     track_id=item["track"]["id"],
                     track_name=item["track"]["name"],
                     track_url=item["track"]["external_urls"].get("spotify", None),
+                    track_uri=item["track"]["uri"],
                     preview_url=item["track"].get("preview_url"),
                     track_popularity=item["track"]["popularity"],
                     album_id=item["track"]["album"]["id"],
@@ -114,19 +115,35 @@ class DiffManager:
         """
         try:
             db_values = {
-                "id": db_playlist.playlist_id,
-                "name": db_playlist.playlist_name,
+                "playlist_id": db_playlist.playlist_id,
+                "playlist_name": db_playlist.playlist_name,
+                "owner_id": db_playlist.owner_id,
+                "owner_name": db_playlist.owner_name,
+                "owner_url": db_playlist.owner_url,
+                "playlist_url": db_playlist.playlist_url,
                 "description": db_playlist.description,
-                "owner": db_playlist.owner_name,
-                "url": db_playlist.playlist_url,
+                "public": db_playlist.public,
+                "followers_total": db_playlist.followers_total,
+                "snapshot_id": db_playlist.snapshot_id,
+                "playlist_image_url": db_playlist.playlist_image_url,
+                "track_count": db_playlist.track_count,
+                "colaborative": db_playlist.colaborative,
             }
 
             spotify_values = {
-                "id": spotify_playlist["id"],
-                "name": spotify_playlist["name"],
-                "description": spotify_playlist["description"],
-                "owner": spotify_playlist["owner"]["id"],
-                "url": spotify_playlist["external_urls"]["spotify"],
+                "playlist_id": spotify_playlist.playlist_id,
+                "playlist_name": spotify_playlist.playlist_name,
+                "owner_id": spotify_playlist.owner_id,
+                "owner_name": spotify_playlist.owner_name,
+                "owner_url": spotify_playlist.owner_url,
+                "playlist_url": spotify_playlist.playlist_url,
+                "description": spotify_playlist.description,
+                "public": spotify_playlist.public,
+                "followers_total": spotify_playlist.followers_total,
+                "snapshot_id": spotify_playlist.snapshot_id,
+                "playlist_image_url": spotify_playlist.playlist_image_url,
+                "track_count": spotify_playlist.track_count,
+                "colaborative": spotify_playlist.colaborative,
             }
 
             metadata_diff = {}

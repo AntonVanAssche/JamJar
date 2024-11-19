@@ -74,6 +74,7 @@ class Database:
                         track_id VARCHAR(255) PRIMARY KEY NOT NULL,
                         track_name VARCHAR(255) NOT NULL,
                         track_url VARCHAR(255) NOT NULL,
+                        track_uri VARCHAR(255) NOT NULL,
                         preview_url VARCHAR(255),
                         track_popularity INT NOT NULL DEFAULT 0,
                         album_id VARCHAR(255) NOT NULL,
@@ -154,6 +155,7 @@ class Database:
         track_id: str,
         track_name: str,
         track_url: str,
+        track_uri: str,
         preview_url: str,
         track_popularity: int,
         album_id: str,
@@ -179,6 +181,7 @@ class Database:
                         track_id,
                         track_name,
                         track_url,
+                        track_uri,
                         preview_url,
                         track_popularity,
                         album_id,
@@ -195,12 +198,13 @@ class Database:
                         user_added,
                         time_added
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         track_id,
                         track_name,
                         track_url,
+                        track_uri,
                         preview_url,
                         track_popularity,
                         album_id,
@@ -364,6 +368,7 @@ class Database:
                         track_id=row["track_id"],
                         track_name=row["track_name"],
                         track_url=row["track_url"],
+                        track_uri=row["track_uri"],
                         preview_url=row["preview_url"],
                         track_popularity=row["track_popularity"],
                         album_id=row["album_id"],
@@ -407,6 +412,7 @@ class Database:
                         track_id=row["track_id"],
                         track_name=row["track_name"],
                         track_url=row["track_url"],
+                        track_uri=row["track_uri"],
                         preview_url=row["preview_url"],
                         track_popularity=row["track_popularity"],
                         album_id=row["album_id"],
