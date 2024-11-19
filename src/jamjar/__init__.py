@@ -19,7 +19,7 @@ from jamjar.cli.auth import auth
 from jamjar.cli.diff import diff
 from jamjar.cli.dump import dump
 from jamjar.cli.list import list as list_command
-from jamjar.cli.remove import remove
+from jamjar.cli.rm import rm
 from jamjar.cli.stats import stats
 from jamjar.cli.sync import sync
 from jamjar.cli.update import update
@@ -37,7 +37,7 @@ cli.add_command(auth)
 cli.add_command(diff)
 cli.add_command(dump)
 cli.add_command(list_command)
-cli.add_command(remove)
+cli.add_command(rm)
 cli.add_command(stats)
 cli.add_command(sync)
 cli.add_command(update)
