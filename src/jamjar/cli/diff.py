@@ -237,8 +237,7 @@ class DiffManager:
 @click.argument("playlist")
 def diff(playlist, details):
     """
-    CLI command to compare the contents of a playlist in the JamJar database
-    with the current state of the playlist on Spotify.
+    Compare a playlist with its current state on Spotify.
 
     :param playlist: The Spotify playlist URL or ID to compare.
     :param details: Flag to indicate whether detailed metadata differences should be shown.

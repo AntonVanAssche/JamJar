@@ -86,22 +86,22 @@ For further instructions, visit the PackageCloud repository:
 $ jamjar --help
 Usage: jamjar [OPTIONS] COMMAND [ARGS]...
 
-  "seal” the history of your Spotify playlists
+  JamJar CLI - "seal" the history of your Spotify playlists.
 
 Options:
   -h, --help     Show this message and exit.
   -v, --version  Display the version of JamJar.
 
 Commands:
-  add     Add a playlist to the database.
-  auth    Manage Spotify authentication.
-  diff    Compares playlist state between database and Spotify.
-  export  Export a playlist's data to a JSON file.
-  list    List playlists or tracks in a specific playlist.
-  remove  Remove a playlist or a specific track from a playlist.
-  stats   Get statistics about the playlists and tracks in the database.
-  sync    Synchronize a playlist with Spotify.
-  update  Update an existing playlist in the database.
+  add    Add a Spotify playlist to the database.
+  auth   Manage Spotify authentication.
+  diff   Compare a playlist with its current state on Spotify.
+  dump   Export playlist data to a JSON file.
+  list   Lists all playlists or tracks in a specific playlist.
+  pull   Pull changes from a playlist and update the database.
+  push   Push a playlist to Spotify.
+  rm     Remove playlists or tracks from the database.
+  stats  Display statistics on playlists, tracks, and users.
 ```
 
 ## Command Details
@@ -165,40 +165,45 @@ To also show playlist metadata changes, use the `--details` flag:
 jamjar diff playlist_id --details
 ```
 
-#### `jamjar update <url|id>`
+#### `jamjar pull [--rm] <url|id>`
 
-Updates an existing playlist in the database.
+Pulls changes from Spotify and updates the database, without remove any tracks.
+When removal is wanted, use the `--rm` flag.
 
 ```console
-jamjar update https://open.spotify.com/playlist/playlist_id
+jamjar pull https://open.spotify.com/playlist/playlist_id
 ```
 
 ```console
-jamjar update playlist_id
+jamjar pull --rm playlist_id
 ```
 
-#### `jamjar remove <playlist_id> [--track-id <track_id>]`
+#### `jamjar push [--name <name>] [--description <description>] [--public] [--image <image>] <id>`
+
+Push a playlist to Spotify.
+
+```console
+jamjar push playlist_id
+```
+
+```console
+jamjar push playlist_id \
+  --name "New Name" \
+  --description "New Description" \
+  --public \
+  --image "/path/to/image.jpg"
+```
+
+#### `jamjar rm <playlist_id> [--track-id <track_id>]`
 
 Removes a playlist or a specific track from a playlist.
 
 ```console
-jamjar remove playlist_id
+jamjar rm playlist_id
 ```
 
 ```console
-jamjar remove playlist_id --track-id track_id
-```
-
-#### `jamjar sync <url|id>`
-
-Syncs the playlist with Spotify to update tracks.
-
-```console
-jamjar sync playlist_id
-```
-
-```console
-jamjar sync https://open.spotify.com/playlist/playlist_id
+jamjar rm playlist_id --track-id track_id
 ```
 
 #### `jamjar list [--playlist <id>]`
@@ -213,12 +218,12 @@ jamjar list
 jamjar list --playlist playlist_id
 ```
 
-#### `jamjar export <id> [--output <filename>]`
+#### `jamjar dump <id> [--output <filename>]`
 
 Exports a playlist's data to a JSON file.
 
 ```console
-jamjar export playlist_id --output my_playlist.json
+jamjar dump playlist_id --output my_playlist.json
 ```
 
 ### Statistics

@@ -86,7 +86,7 @@ class StatsManager:
 @click.option("--recent-tracks", is_flag=True, help="Get the most recent tracks in the database.")
 def stats(top_tracks, top_artists, top_users, recent_tracks):
     """
-    Fetch and display various statistics about playlists, tracks, and users in the database.
+    Display statistics on playlists, tracks, and users.
 
     Use this command to display:
     - General statistics (e.g., total number of playlists, tracks, artists, users)

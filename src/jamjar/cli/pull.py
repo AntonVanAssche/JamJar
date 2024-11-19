@@ -112,7 +112,7 @@ class PullManager:
 @click.option("--rm", "-r", is_flag=True, help="Remove tracks that are no longer in the Spotify playlist.")
 def pull(playlist, rm=False):
     """
-    Command-line interface to synchronize a playlist with Spotify.
+    Pull changes from a playlist and update the database.
 
     Updates the database with the latest playlist metadata and tracks from Spotify.
     Optionally removes tracks that are no longer in the Spotify playlist.

@@ -177,7 +177,7 @@ class AddManager:
 @click.argument("playlist")
 def add(playlist):
     """
-    CLI command to add a Spotify playlist to the database.
+    Add a Spotify playlist to the database.
 
     This command accepts a Spotify playlist URL or ID and stores its metadata
     and tracks in the JamJar database.

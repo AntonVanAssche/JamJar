@@ -86,7 +86,7 @@ class RemoveManager:
 @click.option("--force", "-f", is_flag=True, help="Force removal without confirmation.")
 def rm(playlist_id=None, track_id=None, all=False, force=False):
     """
-    CLI command to remove playlists or tracks from the database.
+    Remove playlists or tracks from the database.
 
     Either a single playlist, track within a playlist, or all playlists and tracks
     can be removed.

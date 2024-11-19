@@ -84,7 +84,7 @@ class DumpManager:
 @click.option("--output", "-o", help="Output file for the playlist data.")
 def dump(identifier, output):
     """
-    Command-line interface to export playlist data to a JSON file.
+    Export playlist data to a JSON file.
 
     Fetches metadata and associated tracks for a specified playlist and writes
     them to a JSON file.
