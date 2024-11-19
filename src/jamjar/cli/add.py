@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 """
-CLI command for adding a playlist to the database.
+CLI command for adding a Spotify playlist to the JamJar database.
 
-This module handles adding a playlist (by URL or ID) to the JamJar database,
-including all of its tracks.
+This module facilitates adding a Spotify playlist (via URL or ID) and its tracks
+to the JamJar database, ensuring all playlist metadata and tracks are properly stored.
 """
 
 import click
@@ -20,27 +20,45 @@ CONFIG = Config()
 
 class AddManager:
     """
-    Handles the logic for adding a Spotify playlist and its tracks to the database.
+    Handles adding Spotify playlists and tracks to the JamJar database.
 
-    This includes extracting playlist information and adding both the playlist and
-    its tracks to the database.
+    This class provides methods to:
+    - Fetch playlist and track data from Spotify.
+    - Add playlist metadata to the database.
+    - Add individual tracks from a playlist to the database.
     """
 
     def __init__(self, db: Database, spotify_api: SpotifyAPI):
+        """
+        Initialize the AddManager with database and Spotify API instances.
+
+        :param db: An instance of the Database class for database operations.
+        :param spotify_api: An instance of the SpotifyAPI class for Spotify interactions.
+        """
+
         self.db = db
         self.spotify_api = spotify_api
 
     def _get_playlist_data(self, playlist_id):
         """
-        Fetches the playlist details from Spotify using the playlist ID.
+        Fetch details of a Spotify playlist using its ID.
+
+        :param playlist_id: The Spotify playlist ID.
+        :return: A dictionary containing playlist details fetched from Spotify.
         """
+
         return self.spotify_api.get_playlist(playlist_id)
 
     # pylint: disable=too-many-locals
     def add_tracks_to_db(self, playlist_id: str, tracks_data: str, action="Added"):
         """
-        Adds tracks from a playlist to the database.
+        Add tracks from a Spotify playlist to the database.
+
+        :param playlist_id: The Spotify playlist ID.
+        :param tracks_data: A dictionary containing track data fetched from Spotify.
+        :param action: A string describing the action being performed (default: "Added").
         """
+
         for track_item in tracks_data["items"]:
             track_id = track_item["track"]["id"]
             if not track_id:
@@ -90,8 +108,13 @@ class AddManager:
 
     def add_playlist_to_db(self, playlist_id, playlist_data, action="Added"):
         """
-        Adds the playlist's data to the database.
+        Add playlist metadata to the database.
+
+        :param playlist_id: The Spotify playlist ID.
+        :param playlist_data: A dictionary containing playlist metadata fetched from Spotify.
+        :param action: A string describing the action being performed (default: "Added").
         """
+
         name = playlist_data.get("name", "Unknown Playlist")
         owner = playlist_data.get("owner", {}).get("", "Unknown Owner")
         owner_id = playlist_data.get("owner", {}).get("id", "unknown_owner_owner")
@@ -125,10 +148,14 @@ class AddManager:
 
     def add_playlist(self, playlist_identifier):
         """
-        AddManager a playlist to the database.
+        Add a Spotify playlist to the database by URL or ID.
 
-        Accepts either a full Spotify playlist URL or just a playlist ID.
+        Fetches playlist metadata and tracks from Spotify, then stores them in the database.
+
+        :param playlist_identifier: A Spotify playlist URL or ID.
+        :raises RuntimeError: If an error occurs during the addition process.
         """
+
         try:
             playlist_id = extract_playlist_id(playlist_identifier)
             print("Adding playlist to the database...")
@@ -150,10 +177,14 @@ class AddManager:
 @click.argument("playlist")
 def add(playlist):
     """
-    Command for adding a playlist to the database.
+    CLI command to add a Spotify playlist to the database.
 
-    Accepts either a Spotify playlist URL or just a playlist ID.
+    This command accepts a Spotify playlist URL or ID and stores its metadata
+    and tracks in the JamJar database.
+
+    :param playlist: The Spotify playlist URL or ID.
     """
+
     access_token = Auth(CONFIG).get_access_token()
     db = Database(CONFIG)
     spotify_api = SpotifyAPI(access_token)
