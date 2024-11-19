@@ -64,7 +64,7 @@ class PullManager:
             if not spotify_playlist:
                 raise ValueError(f"Playlist with ID {playlist_id} not found on Spotify.")
 
-            if not self.db.fetch_playlist_by_id(playlist_id):
+            if not self.db.fetch_playlists(playlist_id):
                 print(f"Playlist with ID {playlist_id} not found in the database.")
                 AddManager(self.db, self.spotify_api).add_playlist(playlist_id)
                 return

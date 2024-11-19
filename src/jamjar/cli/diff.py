@@ -213,7 +213,7 @@ class DiffManager:
 
         try:
             playlist_id = extract_playlist_id(playlist_identifier)
-            db_playlist = self.db.fetch_playlist_by_id(playlist_id)
+            db_playlist = self.db.fetch_playlists(playlist_id)
             spotify_playlist = self.spotify_api.get_playlist(playlist_id)
 
             db_tracks = self._fetch_database_playlist_tracks(playlist_id)

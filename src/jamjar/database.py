@@ -9,7 +9,7 @@ fetching playlists and spotify_tracks from the database.
 
 import sqlite3
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 
 from jamjar.config import Config
 from jamjar.dataclasses import Playlist, Track
@@ -280,120 +280,48 @@ class Database:
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_playlists(self) -> List[Playlist]:
-        """Fetch all playlists from the database."""
+    def fetch_playlists(self, playlist_id: Optional[str] = None) -> Union[Playlist, List[Playlist], None]:
+        """
+        Fetch all, or a specific playlist from the database.
+
+        :param playlist_id (Optional[str]): The unique identifier of the playlist to fetch.
+        :return Union[Playlist, List[Playlist], None]: A single Playlist, a list of Playlists, or None.
+        """
+
         try:
             with self.connection:
-                rows = self.connection.execute(
-                    """
-                    SELECT * FROM spotify_playlist
-                    """
-                ).fetchall()
+                if playlist_id:
+                    query = "SELECT * FROM spotify_playlist WHERE playlist_id = ?"
+                    params = (playlist_id,)
+                else:
+                    query = "SELECT * FROM spotify_playlist"
+                    params = ()
 
-                playlists = []
-                for row in rows:
-                    playlist = Playlist(
-                        playlist_id=row["playlist_id"],
-                        playlist_name=row["playlist_name"],
-                        owner_id=row["owner_id"],
-                        owner_name=row["owner_name"],
-                        owner_url=row["owner_url"],
-                        description=row["description"],
-                        playlist_url=row["playlist_url"],
-                        public=bool(row["public"]),
-                        followers_total=row["followers_total"],
-                        snapshot_id=row["snapshot_id"],
-                        playlist_image_url=row["playlist_image_url"],
-                        track_count=row["track_count"],
-                        colaborative=bool(row["colaborative"]),
-                    )
-                    playlists.append(playlist)
-                return playlists
+                rows = self.connection.execute(query, params).fetchall()
+                if playlist_id:
+                    return self._row_to_playlist(rows[0]) if rows else None
 
+                return [self._row_to_playlist(row) for row in rows]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_playlist_by_id(self, playlist_id: str) -> Playlist:
-        """Fetch a specific playlist specified by the id."""
-        try:
-            with self.connection:
-                row = self.connection.execute(
-                    """
-                    SELECT * FROM spotify_playlist
-                    WHERE playlist_id = ?
-                    """,
-                    (playlist_id,),
-                ).fetchone()
-
-                if row:
-                    playlist = Playlist(
-                        playlist_id=row["playlist_id"],
-                        playlist_name=row["playlist_name"],
-                        owner_id=row["owner_id"],
-                        owner_name=row["owner_name"],
-                        owner_url=row["owner_url"],
-                        description=row["description"],
-                        playlist_url=row["playlist_url"],
-                        public=bool(row["public"]),
-                        followers_total=row["followers_total"],
-                        snapshot_id=row["snapshot_id"],
-                        playlist_image_url=row["playlist_image_url"],
-                        track_count=row["track_count"],
-                        colaborative=bool(row["colaborative"]),
-                    )
-                    return playlist
-
-                return None
-
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
-    def fetch_track_by_id(self, playlist_id: str, track_id: str) -> Track:
-        """Fetch a specific playlist specified by the id."""
-        try:
-            with self.connection:
-                row = self.connection.execute(
-                    """
-                    SELECT * FROM spotify_tracks
-                    WHERE track_id = ? AND playlist_id = ?
-                    """,
-                    (
-                        track_id,
-                        playlist_id,
-                    ),
-                ).fetchone()
-
-                if row:
-                    track = Track(
-                        track_id=row["track_id"],
-                        track_name=row["track_name"],
-                        track_url=row["track_url"],
-                        track_uri=row["track_uri"],
-                        preview_url=row["preview_url"],
-                        track_popularity=row["track_popularity"],
-                        album_id=row["album_id"],
-                        album_name=row["album_name"],
-                        album_url=row["album_url"],
-                        artist_id=row["artist_id"],
-                        artist_name=row["artist_name"],
-                        artist_url=row["artist_url"],
-                        is_explicit=bool(row["is_explicit"]),
-                        is_local=bool(row["is_local"]),
-                        disc_number=row["disc_number"],
-                        isrc_code=row["isrc_code"],
-                        playlist_id=row["playlist_id"],
-                        user_added=row["user_added"],
-                        time_added=row["time_added"],
-                    )
-                    return track
-
-                return None
-
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
-    def fetch_playlist_tracks(self, playlist_id: str) -> List[Track]:
-        """Fetch all spotify_tracks for a specific playlist."""
+    def _row_to_playlist(self, row: sqlite3.Row) -> Playlist:
+        """Convert a database row to a Playlist object."""
+        return Playlist(
+            playlist_id=row["playlist_id"],
+            playlist_name=row["playlist_name"],
+            owner_id=row["owner_id"],
+            owner_name=row["owner_name"],
+            owner_url=row["owner_url"],
+            description=row["description"],
+            playlist_url=row["playlist_url"],
+            public=bool(row["public"]),
+            followers_total=row["followers_total"],
+            snapshot_id=row["snapshot_id"],
+            playlist_image_url=row["playlist_image_url"],
+            track_count=row["track_count"],
+            colaborative=bool(row["colaborative"]),
+        )
         try:
             with self.connection:
                 rows = self.connection.execute(

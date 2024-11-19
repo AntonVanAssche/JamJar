@@ -52,7 +52,7 @@ class DumpManager:
         """
 
         try:
-            playlist = self.db.fetch_playlist_by_id(playlist_identifier)
+            playlist = self.db.fetch_playlists(playlist_identifier)
             if not playlist:
                 raise ValueError(f"Playlist with ID {playlist_identifier} not found.")
 

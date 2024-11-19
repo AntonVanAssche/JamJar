@@ -44,7 +44,7 @@ class RemoveManager:
         """
 
         try:
-            playlist = self.db.fetch_playlist_by_id(playlist_id)
+            playlist = self.db.fetch_playlists(playlist_id)
             if not playlist:
                 print(f"Playlist with ID '{playlist_id.playlist_id}' not found.")
                 return
