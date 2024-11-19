@@ -77,3 +77,57 @@ class SpotifyAPI:
             url = data.get("next")
 
         return {"items": all_tracks}
+
+    def get_user_id(self):
+        """Fetch the user ID from Spotify."""
+        url = f"{self.base_url}/me"
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code != 200:
+            raise SpotifyHTTPError
+
+        return response.json()["id"]
+
+    def post_playlist(self, user_id: str, playlist_data: dict):
+        """Post a playlist to Spotify."""
+        url = f"{self.base_url}/users/{user_id}/playlists"
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.post(url, headers=headers, json=playlist_data, timeout=10)
+        if response.status_code != 201:
+            raise SpotifyHTTPError(response)
+
+        return response.json()
+
+    def post_tracks(self, playlist_id: str, track_uris: list):
+        """Add tracks to a Spotify playlist."""
+        url = f"{self.base_url}/playlists/{playlist_id}/tracks"
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json",
+        }
+        data = {"uris": track_uris}
+
+        response = requests.post(url, headers=headers, json=data, timeout=10)
+        if response.status_code != 201:
+            raise SpotifyHTTPError(response)
+
+        return response.json()
+
+    def post_image(self, playlist_id: str, image_data: str):
+        """Add a cover image to a Spotify playlist."""
+        url = f"{self.base_url}/playlists/{playlist_id}/images"
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "image/jpeg",
+        }
+
+        response = requests.put(url, headers=headers, data=image_data, timeout=10)
+        if response.status_code != 202:
+            raise SpotifyHTTPError(response)
+
+        return response.json()

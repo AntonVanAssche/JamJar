@@ -20,6 +20,7 @@ from jamjar.cli.diff import diff
 from jamjar.cli.dump import dump
 from jamjar.cli.list import list as list_command
 from jamjar.cli.pull import pull
+from jamjar.cli.push import push
 from jamjar.cli.rm import rm
 from jamjar.cli.stats import stats
 
@@ -39,6 +40,7 @@ cli.add_command(list_command)
 cli.add_command(rm)
 cli.add_command(stats)
 cli.add_command(pull)
+cli.add_command(push)
 
 if __name__ == "__main__":
     cli()
