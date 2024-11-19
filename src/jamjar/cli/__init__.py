@@ -10,7 +10,7 @@ managing playlists in the JamJar database.
 from jamjar.cli.add import add
 from jamjar.cli.auth import auth
 from jamjar.cli.diff import diff
-from jamjar.cli.export import export
+from jamjar.cli.dump import dump
 from jamjar.cli.list import list as list_command
 from jamjar.cli.remove import remove
 from jamjar.cli.stats import stats
