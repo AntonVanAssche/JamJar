@@ -96,7 +96,7 @@ class PullManager:
         try:
             rm_manager = RemoveManager(self.db)
             spotify_track_ids = {item["track"]["id"] for item in spotify_tracks["items"]}
-            local_tracks = self.db.fetch_playlist_tracks(playlist_id)
+            local_tracks = self.db.fetch_tracks(playlist_id)
 
             for local_track in local_tracks:
                 if local_track.track_id not in spotify_track_ids:

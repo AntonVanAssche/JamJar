@@ -105,7 +105,7 @@ class ListManager:
 
         try:
             playlist_id = extract_playlist_id(playlist_id)
-            tracks = self.db.fetch_playlist_tracks(playlist_id)
+            tracks = self.db.fetch_tracks(playlist_id)
             if not tracks:
                 # pylint: disable=line-too-long
                 print(json.dumps({"message": f"No tracks found for playlist ID '{playlist_id}'."}, indent=2))

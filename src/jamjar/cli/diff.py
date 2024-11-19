@@ -97,7 +97,7 @@ class DiffManager:
         """
 
         try:
-            db_tracks = self.db.fetch_playlist_tracks(playlist_id)
+            db_tracks = self.db.fetch_tracks(playlist_id)
             return db_tracks
         except Exception as e:
             raise RuntimeError(f"Failed to fetch database playlist tracks: {e}") from e

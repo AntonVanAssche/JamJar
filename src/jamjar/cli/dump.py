@@ -56,7 +56,7 @@ class DumpManager:
             if not playlist:
                 raise ValueError(f"Playlist with ID {playlist_identifier} not found.")
 
-            tracks = self.db.fetch_playlist_tracks(playlist_identifier)
+            tracks = self.db.fetch_tracks(playlist_identifier)
             if not tracks:
                 print(f"No tracks found for playlist ID {playlist_identifier}.")
                 return

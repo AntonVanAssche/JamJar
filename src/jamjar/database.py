@@ -322,46 +322,62 @@ class Database:
             track_count=row["track_count"],
             colaborative=bool(row["colaborative"]),
         )
+
+    def fetch_tracks(
+        self, playlist_id: Optional[str] = None, track_id: Optional[str] = None
+    ) -> Union[Track, List[Track], None]:
+        """
+        Fetch all, or a specific track from the database.
+
+        :param playlist_id (Optional[str]): The unique identifier of the playlist to fetch tracks from.
+        :param track_id (Optional[str]): The unique identifier of the track to fetch.
+        :return Union[Track, List[Track], None]: A single Track, a list of Tracks, or None.
+        """
+
         try:
             with self.connection:
-                rows = self.connection.execute(
-                    """
-                    SELECT *
-                    FROM spotify_tracks
-                    WHERE playlist_id = ?
-                    ORDER BY track_id DESC
-                    """,
-                    (playlist_id,),
-                ).fetchall()
+                if track_id:
+                    query = "SELECT * FROM spotify_tracks WHERE track_id = ? AND playlist_id = ?"
+                    params = (track_id, playlist_id)
+                elif playlist_id:
+                    query = "SELECT * FROM spotify_tracks WHERE playlist_id = ? ORDER BY track_id DESC"
+                    params = (playlist_id,)
+                else:
+                    query = "SELECT * FROM spotify_tracks ORDER BY track_id DESC"
+                    params = ()
 
-                spotify_tracks = []
-                for row in rows:
-                    track = Track(
-                        track_id=row["track_id"],
-                        track_name=row["track_name"],
-                        track_url=row["track_url"],
-                        track_uri=row["track_uri"],
-                        preview_url=row["preview_url"],
-                        track_popularity=row["track_popularity"],
-                        album_id=row["album_id"],
-                        album_name=row["album_name"],
-                        album_url=row["album_url"],
-                        artist_id=row["artist_id"],
-                        artist_name=row["artist_name"],
-                        artist_url=row["artist_url"],
-                        is_explicit=bool(row["is_explicit"]),
-                        is_local=bool(row["is_local"]),
-                        disc_number=row["disc_number"],
-                        isrc_code=row["isrc_code"],
-                        playlist_id=row["playlist_id"],
-                        user_added=row["user_added"],
-                        time_added=row["time_added"],
-                    )
-                    spotify_tracks.append(track)
-                return spotify_tracks
+                rows = self.connection.execute(query, params).fetchall()
+                if track_id:
+                    return self._row_to_track(rows[0]) if rows else None
 
+                return [self._row_to_track(row) for row in rows]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
+
+    def _row_to_track(self, row: sqlite3.Row) -> Track:
+        """Convert a database row to a Track object."""
+
+        return Track(
+            track_id=row["track_id"],
+            track_name=row["track_name"],
+            track_url=row["track_url"],
+            track_uri=row["track_uri"],
+            preview_url=row["preview_url"],
+            track_popularity=row["track_popularity"],
+            album_id=row["album_id"],
+            album_name=row["album_name"],
+            album_url=row["album_url"],
+            artist_id=row["artist_id"],
+            artist_name=row["artist_name"],
+            artist_url=row["artist_url"],
+            is_explicit=bool(row["is_explicit"]),
+            is_local=bool(row["is_local"]),
+            disc_number=row["disc_number"],
+            isrc_code=row["isrc_code"],
+            playlist_id=row["playlist_id"],
+            user_added=row["user_added"],
+            time_added=row["time_added"],
+        )
 
     def count_playlists(self) -> int:
         """Fetch the total number of playlists in the database."""
