@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 """
-CLI command to get statistics about the playlists and tracks in the database.
+CLI command for fetching statistics about playlists, tracks, and users in the database.
 
-This includes fetching the top tracks, artists, and users, as well as the most
-recent tracks in the database. When no options are provided, general statistics
-such as the total number of playlists, tracks, artists, and users are displayed.
+This module provides functionality for fetching and displaying statistics such as the top
+tracks, top artists, top users, and the most recent tracks in the database. When no specific
+options are provided, general statistics (total counts) for playlists, tracks, artists, and
+users are displayed.
 """
 
 import json
@@ -20,45 +21,50 @@ CONFIG = Config()
 
 class StatsManager:
     """
-    Handles the logic for displaying statistics about the playlists and tracks
-    in the database.
+    Manages the logic for fetching and displaying various statistics about playlists,
+    tracks, and users in the database.
+
+    This class includes methods to retrieve information like the top tracks, top artists,
+    top users, recent tracks, and overall statistics about the database (e.g., counts of
+    playlists, tracks, artists, and users).
     """
 
     def __init__(self, db: Database):
+        """
+        Initializes the StatsManager with a given database connection.
+
+        :param db: The Database object used for querying the database.
+        """
+
         self.db = db
 
     def get_top_tracks(self):
-        """
-        Get the top tracks in the database and display them.
-        """
+        """Fetch and display the top tracks in the database."""
+
         data = self.db.fetch_top_tracks()
         print(json.dumps({"top_tracks": data}, indent=2))
 
     def get_top_artists(self):
-        """
-        Get the top artists in the database and display them.
-        """
+        """Fetch and display the top artists in the database."""
+
         data = self.db.fetch_top_artists()
         print(json.dumps({"top_artists": data}, indent=2))
 
     def get_top_users(self):
-        """
-        Get the top users in the database and display them.
-        """
+        """Fetch and display the top users in the database."""
+
         data = self.db.fetch_top_users()
         print(json.dumps({"top_users": data}, indent=2))
 
     def get_recent_tracks(self):
-        """
-        Get the most recent tracks in the database and display them.
-        """
+        """Fetch and display the most recent tracks added to the database."""
+
         data = self.db.fetch_recent_tracks()
         print(json.dumps({"recent_tracks": data}, indent=2))
 
     def get_stats(self):
-        """
-        Get statistics about the playlists and tracks in the database and display them.
-        """
+        """Fetch and display general statistics about the database."""
+
         total_playlists = self.db.count_playlists()
         total_tracks = self.db.count_tracks()
         total_artists = self.db.count_artists()
@@ -80,7 +86,14 @@ class StatsManager:
 @click.option("--recent-tracks", is_flag=True, help="Get the most recent tracks in the database.")
 def stats(top_tracks, top_artists, top_users, recent_tracks):
     """
-    Get statistics about the playlists and tracks in the database.
+    Fetch and display various statistics about playlists, tracks, and users in the database.
+
+    Use this command to display:
+    - General statistics (e.g., total number of playlists, tracks, artists, users)
+    - Top tracks, top artists, or top users
+    - Most recent tracks added to the database
+
+    If no options are specified, general statistics will be displayed.
     """
     db = Database(CONFIG)
     stats_manager = StatsManager(db)
