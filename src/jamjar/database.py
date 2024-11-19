@@ -457,34 +457,6 @@ class Database:
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_recently_added_tracks(self, limit: int = 10) -> List[dict]:
-        """Fetch the most recently added spotify_tracks in the database."""
-        try:
-            with self.connection:
-                rows = self.connection.execute(
-                    """
-                    SELECT t.track_name, t.artist_name, t.user_added, t.time_added, p.playlist_name
-                    FROM spotify_tracks t
-                    JOIN spotify_playlist p ON t.playlist_id = p.playlist_id
-                    ORDER BY t.time_added DESC
-                    LIMIT ?
-                    """,
-                    (limit,),
-                ).fetchall()
-
-                return [
-                    {
-                        "track_name": row[0],
-                        "artist_name": row[1],
-                        "user_added": row[2],
-                        "time_added": row[3],
-                        "playlist_name": row[4],
-                    }
-                    for row in rows
-                ]
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
     def fetch_top_tracks(self, limit: int = 10) -> List[dict]:
         """Fetch the top spotify_tracks in the database based on the number of playlists they appear in."""
         try:
