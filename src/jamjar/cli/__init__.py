@@ -12,7 +12,6 @@ from jamjar.cli.auth import auth
 from jamjar.cli.diff import diff
 from jamjar.cli.dump import dump
 from jamjar.cli.list import list as list_command
+from jamjar.cli.pull import pull
 from jamjar.cli.rm import rm
 from jamjar.cli.stats import stats
-from jamjar.cli.sync import sync
-from jamjar.cli.update import update
