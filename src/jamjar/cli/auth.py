@@ -47,7 +47,8 @@ class Auth:
                 "playlist-read-private "
                 "playlist-read-collaborative "
                 "playlist-modify-private "
-                "playlist-modify-public"
+                "playlist-modify-public "
+                "ugc-image-upload"
             )
             params = {
                 "client_id": self.client_id,

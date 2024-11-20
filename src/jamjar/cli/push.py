@@ -88,7 +88,6 @@ class PushManager:
         :return: The response from the Spotify API.
         """
 
-        print(track_uris)
         return self.spotify_api.post_tracks(playlist_id, track_uris)
 
     def _post_image(self, playlist_id, image_data):
@@ -121,9 +120,6 @@ class PushManager:
             if not tracks:
                 raise ValueError(f"No tracks found for playlist with ID {playlist_id}.")
 
-            if image:
-                image_data = self._encode_image(image)
-
             user_id = self._get_user_id()
             playlist_data = {
                 "name": name,
@@ -144,6 +140,7 @@ class PushManager:
                 print(f"Added {len(track_uris)} tracks to the playlist.")
 
             if image:
+                image_data = self._encode_image(image)
                 self._post_image(playlist_id, image_data)
                 print("Cover image added to the playlist.")
 
