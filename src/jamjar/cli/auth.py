@@ -41,8 +41,14 @@ class Auth:
     def login(self):
         """Initiates the login flow."""
         try:
-            # pylint: disable=line-too-long
-            scope = "user-read-private user-read-email playlist-read-private playlist-read-collaborative"
+            scope = (
+                "user-read-private "
+                "user-read-email "
+                "playlist-read-private "
+                "playlist-read-collaborative "
+                "playlist-modify-private "
+                "playlist-modify-public"
+            )
             params = {
                 "client_id": self.client_id,
                 "response_type": "code",
@@ -51,6 +57,8 @@ class Auth:
                 "show_dialog": True,
             }
             auth_url = f"{self.auth_url}?{urllib.parse.urlencode(params)}"
+
+            # pylint: disable=line-too-long
             print(f"Please visit the following URL to authorize:\n{auth_url}\n")
             print("After authorizing, the app will handle the callback and complete authentication.")
             self._start_http_server()
@@ -230,11 +238,12 @@ class Auth:
                 print("Not logged in.")
                 return
             if datetime.now().timestamp() > token_info["expires_at"]:
-                print("Access token expired. Run `jamjar --auth` to refresh.")
+                print("Access token expired.")
             else:
-                # pylint: disable=line-too-long
-                print(f"Logged in as {self.display_username(token_info['access_token'])}.")
-                print(f"Access token expires at {datetime.fromtimestamp(token_info['expires_at'])}.")
+                username = self.display_username(token_info["access_token"])
+                expires_at = datetime.fromtimestamp(token_info["expires_at"])
+                print(f"Logged in as {username}.")
+                print(f"Access token expires at {expires_at}.")
         except Exception as e:
             print(f"Error displaying status: {e}")
             raise

@@ -76,6 +76,7 @@ class Track:
         track_id,
         track_name,
         track_url,
+        track_uri,
         preview_url,
         track_popularity,
         album_id,
@@ -95,6 +96,7 @@ class Track:
         self.track_id = track_id
         self.track_name = track_name
         self.track_url = track_url
+        self.track_uri = track_uri
         self.preview_url = preview_url
         self.track_popularity = track_popularity
         self.album_id = album_id
@@ -117,6 +119,7 @@ class Track:
             "track_id": self.track_id,
             "track_name": self.track_name,
             "track_url": self.track_url,
+            "track_uri": self.track_uri,
             "preview_url": self.preview_url,
             "track_popularity": self.track_popularity,
             "album_id": self.album_id,

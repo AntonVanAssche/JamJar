@@ -9,7 +9,7 @@ fetching playlists and spotify_tracks from the database.
 
 import sqlite3
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 
 from jamjar.config import Config
 from jamjar.dataclasses import Playlist, Track
@@ -74,6 +74,7 @@ class Database:
                         track_id VARCHAR(255) PRIMARY KEY NOT NULL,
                         track_name VARCHAR(255) NOT NULL,
                         track_url VARCHAR(255) NOT NULL,
+                        track_uri VARCHAR(255) NOT NULL,
                         preview_url VARCHAR(255),
                         track_popularity INT NOT NULL DEFAULT 0,
                         album_id VARCHAR(255) NOT NULL,
@@ -154,6 +155,7 @@ class Database:
         track_id: str,
         track_name: str,
         track_url: str,
+        track_uri: str,
         preview_url: str,
         track_popularity: int,
         album_id: str,
@@ -179,6 +181,7 @@ class Database:
                         track_id,
                         track_name,
                         track_url,
+                        track_uri,
                         preview_url,
                         track_popularity,
                         album_id,
@@ -195,12 +198,13 @@ class Database:
                         user_added,
                         time_added
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         track_id,
                         track_name,
                         track_url,
+                        track_uri,
                         preview_url,
                         track_popularity,
                         album_id,
@@ -276,158 +280,104 @@ class Database:
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_playlists(self) -> List[Playlist]:
-        """Fetch all playlists from the database."""
+    def fetch_playlists(self, playlist_id: Optional[str] = None) -> Union[Playlist, List[Playlist], None]:
+        """
+        Fetch all, or a specific playlist from the database.
+
+        :param playlist_id (Optional[str]): The unique identifier of the playlist to fetch.
+        :return Union[Playlist, List[Playlist], None]: A single Playlist, a list of Playlists, or None.
+        """
+
         try:
             with self.connection:
-                rows = self.connection.execute(
-                    """
-                    SELECT * FROM spotify_playlist
-                    """
-                ).fetchall()
+                if playlist_id:
+                    query = "SELECT * FROM spotify_playlist WHERE playlist_id = ?"
+                    params = (playlist_id,)
+                else:
+                    query = "SELECT * FROM spotify_playlist"
+                    params = ()
 
-                playlists = []
-                for row in rows:
-                    playlist = Playlist(
-                        playlist_id=row["playlist_id"],
-                        playlist_name=row["playlist_name"],
-                        owner_id=row["owner_id"],
-                        owner_name=row["owner_name"],
-                        owner_url=row["owner_url"],
-                        description=row["description"],
-                        playlist_url=row["playlist_url"],
-                        public=bool(row["public"]),
-                        followers_total=row["followers_total"],
-                        snapshot_id=row["snapshot_id"],
-                        playlist_image_url=row["playlist_image_url"],
-                        track_count=row["track_count"],
-                        colaborative=bool(row["colaborative"]),
-                    )
-                    playlists.append(playlist)
-                return playlists
+                rows = self.connection.execute(query, params).fetchall()
+                if playlist_id:
+                    return self._row_to_playlist(rows[0]) if rows else None
 
+                return [self._row_to_playlist(row) for row in rows]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_playlist_by_id(self, playlist_id: str) -> Playlist:
-        """Fetch a specific playlist specified by the id."""
+    def _row_to_playlist(self, row: sqlite3.Row) -> Playlist:
+        """Convert a database row to a Playlist object."""
+        return Playlist(
+            playlist_id=row["playlist_id"],
+            playlist_name=row["playlist_name"],
+            owner_id=row["owner_id"],
+            owner_name=row["owner_name"],
+            owner_url=row["owner_url"],
+            description=row["description"],
+            playlist_url=row["playlist_url"],
+            public=bool(row["public"]),
+            followers_total=row["followers_total"],
+            snapshot_id=row["snapshot_id"],
+            playlist_image_url=row["playlist_image_url"],
+            track_count=row["track_count"],
+            colaborative=bool(row["colaborative"]),
+        )
+
+    def fetch_tracks(
+        self, playlist_id: Optional[str] = None, track_id: Optional[str] = None
+    ) -> Union[Track, List[Track], None]:
+        """
+        Fetch all, or a specific track from the database.
+
+        :param playlist_id (Optional[str]): The unique identifier of the playlist to fetch tracks from.
+        :param track_id (Optional[str]): The unique identifier of the track to fetch.
+        :return Union[Track, List[Track], None]: A single Track, a list of Tracks, or None.
+        """
+
         try:
             with self.connection:
-                row = self.connection.execute(
-                    """
-                    SELECT * FROM spotify_playlist
-                    WHERE playlist_id = ?
-                    """,
-                    (playlist_id,),
-                ).fetchone()
+                if track_id:
+                    query = "SELECT * FROM spotify_tracks WHERE track_id = ? AND playlist_id = ?"
+                    params = (track_id, playlist_id)
+                elif playlist_id:
+                    query = "SELECT * FROM spotify_tracks WHERE playlist_id = ? ORDER BY track_id DESC"
+                    params = (playlist_id,)
+                else:
+                    query = "SELECT * FROM spotify_tracks ORDER BY track_id DESC"
+                    params = ()
 
-                if row:
-                    playlist = Playlist(
-                        playlist_id=row["playlist_id"],
-                        playlist_name=row["playlist_name"],
-                        owner_id=row["owner_id"],
-                        owner_name=row["owner_name"],
-                        owner_url=row["owner_url"],
-                        description=row["description"],
-                        playlist_url=row["playlist_url"],
-                        public=bool(row["public"]),
-                        followers_total=row["followers_total"],
-                        snapshot_id=row["snapshot_id"],
-                        playlist_image_url=row["playlist_image_url"],
-                        track_count=row["track_count"],
-                        colaborative=bool(row["colaborative"]),
-                    )
-                    return playlist
+                rows = self.connection.execute(query, params).fetchall()
+                if track_id:
+                    return self._row_to_track(rows[0]) if rows else None
 
-                return None
-
+                return [self._row_to_track(row) for row in rows]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_track_by_id(self, playlist_id: str, track_id: str) -> Track:
-        """Fetch a specific playlist specified by the id."""
-        try:
-            with self.connection:
-                row = self.connection.execute(
-                    """
-                    SELECT * FROM spotify_tracks
-                    WHERE track_id = ? AND playlist_id = ?
-                    """,
-                    (
-                        track_id,
-                        playlist_id,
-                    ),
-                ).fetchone()
+    def _row_to_track(self, row: sqlite3.Row) -> Track:
+        """Convert a database row to a Track object."""
 
-                if row:
-                    track = Track(
-                        track_id=row["track_id"],
-                        track_name=row["track_name"],
-                        track_url=row["track_url"],
-                        preview_url=row["preview_url"],
-                        track_popularity=row["track_popularity"],
-                        album_id=row["album_id"],
-                        album_name=row["album_name"],
-                        album_url=row["album_url"],
-                        artist_id=row["artist_id"],
-                        artist_name=row["artist_name"],
-                        artist_url=row["artist_url"],
-                        is_explicit=bool(row["is_explicit"]),
-                        is_local=bool(row["is_local"]),
-                        disc_number=row["disc_number"],
-                        isrc_code=row["isrc_code"],
-                        playlist_id=row["playlist_id"],
-                        user_added=row["user_added"],
-                        time_added=row["time_added"],
-                    )
-                    return track
-
-                return None
-
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
-    def fetch_playlist_tracks(self, playlist_id: str) -> List[Track]:
-        """Fetch all spotify_tracks for a specific playlist."""
-        try:
-            with self.connection:
-                rows = self.connection.execute(
-                    """
-                    SELECT *
-                    FROM spotify_tracks
-                    WHERE playlist_id = ?
-                    ORDER BY track_id DESC
-                    """,
-                    (playlist_id,),
-                ).fetchall()
-
-                spotify_tracks = []
-                for row in rows:
-                    track = Track(
-                        track_id=row["track_id"],
-                        track_name=row["track_name"],
-                        track_url=row["track_url"],
-                        preview_url=row["preview_url"],
-                        track_popularity=row["track_popularity"],
-                        album_id=row["album_id"],
-                        album_name=row["album_name"],
-                        album_url=row["album_url"],
-                        artist_id=row["artist_id"],
-                        artist_name=row["artist_name"],
-                        artist_url=row["artist_url"],
-                        is_explicit=bool(row["is_explicit"]),
-                        is_local=bool(row["is_local"]),
-                        disc_number=row["disc_number"],
-                        isrc_code=row["isrc_code"],
-                        playlist_id=row["playlist_id"],
-                        user_added=row["user_added"],
-                        time_added=row["time_added"],
-                    )
-                    spotify_tracks.append(track)
-                return spotify_tracks
-
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
+        return Track(
+            track_id=row["track_id"],
+            track_name=row["track_name"],
+            track_url=row["track_url"],
+            track_uri=row["track_uri"],
+            preview_url=row["preview_url"],
+            track_popularity=row["track_popularity"],
+            album_id=row["album_id"],
+            album_name=row["album_name"],
+            album_url=row["album_url"],
+            artist_id=row["artist_id"],
+            artist_name=row["artist_name"],
+            artist_url=row["artist_url"],
+            is_explicit=bool(row["is_explicit"]),
+            is_local=bool(row["is_local"]),
+            disc_number=row["disc_number"],
+            isrc_code=row["isrc_code"],
+            playlist_id=row["playlist_id"],
+            user_added=row["user_added"],
+            time_added=row["time_added"],
+        )
 
     def count_playlists(self) -> int:
         """Fetch the total number of playlists in the database."""
@@ -477,61 +427,27 @@ class Database:
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def fetch_unique_artists(self) -> List[str]:
-        """Fetch a list of unique artists in the database."""
+    def count_unique_artists(self) -> int:
+        """Fetch the total number of unique artists in the database."""
         try:
             with self.connection:
-                return [
-                    row[0]
-                    for row in self.connection.execute(
-                        """
-                        SELECT DISTINCT artist_name FROM spotify_tracks
-                        """
-                    ).fetchall()
-                ]
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
-    def fetch_unique_tracks(self) -> List[str]:
-        """Fetch a list of unique tracks in the database."""
-        try:
-            with self.connection:
-                return [
-                    row[0]
-                    for row in self.connection.execute(
-                        """
-                        SELECT track_name FROM spotify_tracks
-                        """
-                    ).fetchall()
-                ]
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
-    def fetch_recently_added_tracks(self, limit: int = 10) -> List[dict]:
-        """Fetch the most recently added spotify_tracks in the database."""
-        try:
-            with self.connection:
-                rows = self.connection.execute(
+                return self.connection.execute(
                     """
-                    SELECT t.track_name, t.artist_name, t.user_added, t.time_added, p.playlist_name
-                    FROM spotify_tracks t
-                    JOIN spotify_playlist p ON t.playlist_id = p.playlist_id
-                    ORDER BY t.time_added DESC
-                    LIMIT ?
-                    """,
-                    (limit,),
-                ).fetchall()
+                    SELECT COUNT(DISTINCT artist_name) FROM spotify_tracks
+                    """
+                ).fetchone()[0]
+        except sqlite3.Error as e:
+            raise DatabaseError(e) from e
 
-                return [
-                    {
-                        "track_name": row[0],
-                        "artist_name": row[1],
-                        "user_added": row[2],
-                        "time_added": row[3],
-                        "playlist_name": row[4],
-                    }
-                    for row in rows
-                ]
+    def count_unique_tracks(self) -> List[str]:
+        """Count the number of unique spotify_tracks in the database."""
+        try:
+            with self.connection:
+                return self.connection.execute(
+                    """
+                    SELECT COUNT(DISTINCT track_name) FROM spotify_tracks
+                    """
+                ).fetchone()[0]
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
