@@ -67,6 +67,7 @@ class StatsManager:
 
         total_playlists = self.db.count_playlists()
         total_tracks = self.db.count_tracks()
+        unique_tracks = self.db.count_unique_tracks()
         total_artists = self.db.count_artists()
         total_users = self.db.count_users()
         json_data = {
