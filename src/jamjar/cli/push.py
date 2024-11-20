@@ -88,7 +88,6 @@ class PushManager:
         :return: The response from the Spotify API.
         """
 
-        print(track_uris)
         return self.spotify_api.post_tracks(playlist_id, track_uris)
 
     def _post_image(self, playlist_id, image_data):
