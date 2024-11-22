@@ -34,35 +34,39 @@ class PushManager:
         self.db = db
         self.spotify_api = spotify_api
 
-    def _get_user_id(self):
+    def _get_user_id(self) -> str:
         """
         Fetch the Spotify user ID.
+
         :return: The Spotify user ID.
         """
 
         return self.spotify_api.get_user_id()
 
-    def _get_playlist_data(self, playlist_id):
+    def _get_playlist_data(self, playlist_id: str) -> dict:
         """
         Fetch details of a Spotify playlist using its ID.
+
         :param playlist_id: The Spotify playlist ID.
         :return: A dictionary containing playlist details fetched from Spotify.
         """
 
         return self.spotify_api.get_playlist(playlist_id)
 
-    def _get_playlist_tracks(self, playlist_id):
+    def _get_playlist_tracks(self, playlist_id: str) -> dict:
         """
         Fetch tracks of a Spotify playlist using its ID.
+
         :param playlist_id: The Spotify playlist ID.
         :return: A dictionary containing track details fetched from Spotify.
         """
 
         return self.spotify_api.get_playlist_tracks(playlist_id)
 
-    def _encode_image(self, image_path):
+    def _encode_image(self, image_path: str) -> str:
         """
         Encode an image file to base64.
+
         :param image_path: The path to the image file.
         :return: The base64-encoded image.
         """
@@ -70,9 +74,10 @@ class PushManager:
         with open(image_path, "rb") as image:
             return base64.b64encode(image.read()).decode("utf-8")
 
-    def _post_playlist(self, user_id, playlist_data):
+    def _post_playlist(self, user_id: str, playlist_data: dict) -> dict:
         """
         Post a playlist to Spotify.
+
         :param user_id: The Spotify user ID.
         :param playlist_data: A dictionary containing playlist data.
         :return: The response from the Spotify API.
@@ -80,9 +85,10 @@ class PushManager:
 
         return self.spotify_api.post_playlist(user_id, playlist_data)
 
-    def _post_playlist_tracks(self, playlist_id, track_uris):
+    def _post_playlist_tracks(self, playlist_id: str, track_uris: str) -> dict:
         """
         Add tracks to a Spotify playlist.
+
         :param playlist_id: The Spotify playlist ID.
         :param track_uris: A list of Spotify track URIs.
         :return: The response from the Spotify API.
@@ -90,9 +96,10 @@ class PushManager:
 
         return self.spotify_api.post_tracks(playlist_id, track_uris)
 
-    def _post_image(self, playlist_id, image_data):
+    def _post_image(self, playlist_id: str, image_data: str) -> dict:
         """
         Add a cover image to a Spotify playlist.
+
         :param playlist_id: The Spotify playlist ID.
         :param image_data: The base64-encoded image data.
         """
@@ -104,13 +111,17 @@ class PushManager:
     # pylint: disable=line-too-long
     # pylint: disable=too-many-function-args
     # pylint: disable=too-many-locals
-    def push_playlist(self, playlist_id: str, name: str, description: str, public: bool, image: str):
+    def push_playlist(self, playlist_id: str, name: str, description: str, public: bool, image: str) -> dict:
         """
         Push a playlist to Spotify.
 
         :param playlist_id: The unique identifier for the playlist.
+        :param name: The desired name of the playlist on Spotify.
+        :param description: A description for the playlist.
+        :param public: Whether the playlist should be public.
+        :param image: Path to an image file for the playlist cover.
+        :return: A dictionary summarizing the actions performed.
         """
-
         try:
             playlist = self.db.fetch_playlists(playlist_id)
             if not playlist:
@@ -128,21 +139,27 @@ class PushManager:
             }
 
             response_create_playlist = self._post_playlist(user_id, playlist_data)
-            if response_create_playlist:
-                playlist_id = response_create_playlist["id"]
-                playlist_url = response_create_playlist["external_urls"]["spotify"]
-                print(f"Playlist created with ID {playlist_id}.")
-                print(f"Playlist URL: {playlist_url}")
+            if not response_create_playlist:
+                raise RuntimeError("Failed to create playlist on Spotify.")
+
+            playlist_id = response_create_playlist["id"]
+            playlist_url = response_create_playlist["external_urls"]["spotify"]
 
             track_uris = [track.track_uri for track in tracks]
             response_add_tracks = self._post_playlist_tracks(playlist_id, track_uris)
-            if response_add_tracks:
-                print(f"Added {len(track_uris)} tracks to the playlist.")
+            if not response_add_tracks:
+                raise RuntimeError("Failed to add tracks to the playlist.")
 
             if image:
                 image_data = self._encode_image(image)
                 self._post_image(playlist_id, image_data)
-                print("Cover image added to the playlist.")
+
+            return {
+                "playlist_id": playlist_id,
+                "playlist_url": playlist_url,
+                "track_count": len(track_uris),
+                "image_uploaded": bool(image),
+            }
 
         except Exception as e:
             raise RuntimeError(f"Failed to push playlist: {e}") from e
@@ -161,7 +178,6 @@ def push(playlist_id, name, description, public, image):
 
     :param playlist: The Spotify playlist URL or ID.
     """
-
     access_token = Auth(CONFIG).get_access_token()
     db = Database(CONFIG)
     spotify_api = SpotifyAPI(access_token)
@@ -175,4 +191,11 @@ def push(playlist_id, name, description, public, image):
         prompt = "Enter a description for the new playlist"
         description = click.prompt(prompt, type=str)
 
-    push_manager.push_playlist(playlist_id, name, description, public, image)
+    try:
+        result = push_manager.push_playlist(playlist_id, name, description, public, image)
+        print(f"Playlist created: {result['playlist_url']}")
+        print(f"Tracks added: {result['track_count']}")
+        if result["image_uploaded"]:
+            print("Cover image uploaded successfully.")
+    except RuntimeError as e:
+        print(f"Error: {e}")
