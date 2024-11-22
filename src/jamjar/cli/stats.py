@@ -42,25 +42,25 @@ class StatsManager:
         """Fetch and display the top tracks in the database."""
 
         data = self.db.fetch_top_tracks()
-        print(json.dumps({"top_tracks": data}, indent=2))
+        return {"top_tracks": data}
 
     def get_top_artists(self):
         """Fetch and display the top artists in the database."""
 
         data = self.db.fetch_top_artists()
-        print(json.dumps({"top_artists": data}, indent=2))
+        return {"top_artists": data}
 
     def get_top_users(self):
         """Fetch and display the top users in the database."""
 
         data = self.db.fetch_top_users()
-        print(json.dumps({"top_users": data}, indent=2))
+        return {"top_users": data}
 
     def get_recent_tracks(self):
         """Fetch and display the most recent tracks added to the database."""
 
         data = self.db.fetch_recent_tracks()
-        print(json.dumps({"recent_tracks": data}, indent=2))
+        return {"recent_tracks": data}
 
     def get_stats(self):
         """Fetch and display general statistics about the database."""
@@ -71,7 +71,8 @@ class StatsManager:
         total_artists = self.db.count_artists()
         unique_artists = self.db.count_unique_artists()
         total_users = self.db.count_users()
-        json_data = {
+
+        return {
             "total_playlists": total_playlists,
             "total_tracks": total_tracks,
             "unique_tracks": unique_tracks,
@@ -79,7 +80,6 @@ class StatsManager:
             "unique_artists": unique_artists,
             "total_users": total_users,
         }
-        print(json.dumps(json_data, indent=2))
 
 
 @click.command()
@@ -103,21 +103,26 @@ def stats(top_tracks, top_artists, top_users, recent_tracks):
     stats_manager = StatsManager(db)
 
     if top_tracks:
-        stats_manager.get_top_tracks()
+        top_tracks_data = stats_manager.get_top_tracks()
+        print(json.dumps(top_tracks_data, indent=2))
         return
 
     if top_artists:
-        stats_manager.get_top_artists()
+        top_artists_data = stats_manager.get_top_artists()
+        print(json.dumps(top_artists_data, indent=2))
         return
 
     if top_users:
-        stats_manager.get_top_users()
+        top_users_data = stats_manager.get_top_users()
+        print(json.dumps(top_users_data, indent=2))
         return
 
     if recent_tracks:
-        stats_manager.get_recent_tracks()
+        recent_tracks_data = stats_manager.get_recent_tracks()
+        print(json.dumps(recent_tracks_data, indent=2))
         return
 
     if not any([top_tracks, top_artists, top_users, recent_tracks]):
-        stats_manager.get_stats()
+        stats_data = stats_manager.get_stats()
+        print(json.dumps(stats_data, indent=2))
         return
