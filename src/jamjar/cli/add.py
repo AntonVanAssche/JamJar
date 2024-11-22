@@ -117,7 +117,7 @@ class AddManager:
 
         name = playlist_data.get("name", "Unknown Playlist")
         owner_id = playlist_data.get("owner", {}).get("id", "unknown_owner_owner")
-        owner = playlist_data.get("owner", {}).get("display_name", "Unknown Owner")
+        owner_name = playlist_data.get("owner", {}).get("display_name", "Unknown Owner")
         owner_url = playlist_data.get("owner", {}).get("external_urls", {}).get("spotify", "")
         description = playlist_data.get("description", "")
         url = playlist_data["external_urls"]["spotify"]
@@ -132,15 +132,15 @@ class AddManager:
             playlist_id,
             name,
             owner_id,
-            owner,
+            owner_name,
             owner_url,
             description,
             url,
-            public,
-            followers_total,
             snapshot_id,
             playlist_image_url,
+            followers_total,
             track_count,
+            public,
             colaborative,
         )
 
