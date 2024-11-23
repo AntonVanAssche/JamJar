@@ -36,7 +36,7 @@ class DumpManager:
 
         self.db = db
 
-    def dump_playlist(self, playlist_identifier, output_file=None):
+    def dump_playlist(self, playlist_identifier: str, output_file: str = None) -> dict:
         """
         Export a playlist's data to a JSON file.
 
@@ -47,6 +47,7 @@ class DumpManager:
         :param output_file: The optional file path for the exported JSON data.
                             If not provided, a sanitized version of the playlist
                             name will be used to create the file name.
+        :return: A dictionary containing the status and message of the export process.
         :raises ValueError: If the playlist is not found in the database.
         :raises RuntimeError: If the export process fails.
         """
@@ -58,8 +59,7 @@ class DumpManager:
 
             tracks = self.db.fetch_tracks(playlist_identifier)
             if not tracks:
-                print(f"No tracks found for playlist ID {playlist_identifier}.")
-                return
+                raise ValueError(f"No tracks found for playlist with ID {playlist_identifier}.")
 
             export_data = {
                 "metadata": playlist._asdict(),
@@ -73,7 +73,10 @@ class DumpManager:
             with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2)
 
-            print(f"Playlist data exported to {output_file}.")
+            return {
+                "status": "success",
+                "output_file": output_file,
+            }
         except Exception as e:
             raise RuntimeError(f"Failed to export playlist: {e}") from e
 
@@ -96,4 +99,6 @@ def dump(identifier, output):
     db = Database(CONFIG)
     dump_manager = DumpManager(db)
 
-    dump_manager.dump_playlist(identifier, output)
+    result = dump_manager.dump_playlist(identifier, output)
+    if result["status"] == "success":
+        print(f"Playlist data exported to '{result['output_file']}.'")

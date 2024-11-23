@@ -49,127 +49,121 @@ class AddManager:
 
         return self.spotify_api.get_playlist(playlist_id)
 
-    # pylint: disable=too-many-locals
-    def add_tracks_to_db(self, playlist_id: str, tracks_data: str, action="Added"):
+    def add_tracks_to_db(self, playlist_id: str, tracks_data: str) -> dict:
         """
         Add tracks from a Spotify playlist to the database.
 
         :param playlist_id: The Spotify playlist ID.
         :param tracks_data: A dictionary containing track data fetched from Spotify.
-        :param action: A string describing the action being performed (default: "Added").
+        :return: A summary of the operation.
         """
 
-        for track_item in tracks_data["items"]:
-            track_id = track_item["track"]["id"]
-            if not track_id:
+        added_tracks = []
+        for track_item in tracks_data.get("items", []):
+            track = track_item.get("track")
+            if not track or not track.get("id"):
                 continue
 
-            track_name = track_item["track"]["name"]
-            track_url = track_item["track"]["external_urls"]["spotify"]
-            track_uri = track_item["track"]["uri"]
-            preview_url = track_item["track"].get("preview_url", "")
-            track_popularity = track_item["track"].get("popularity", 0)
-            album_id = track_item["track"]["album"]["id"]
-            album_name = track_item["track"]["album"]["name"]
-            album_url = track_item["track"]["album"]["external_urls"]["spotify"]
-            artist_id = track_item["track"]["artists"][0]["id"]
-            artist_name = track_item["track"]["artists"][0]["name"]
-            artist_url = track_item["track"]["artists"][0]["external_urls"]["spotify"]
-            is_explicit = track_item["track"].get("explicit", False)
-            is_local = track_item["track"].get("is_local", False)
-            disc_number = track_item["track"].get("disc_number", 0)
-            isrc_code = track_item["track"].get("external_ids", {}).get("isrc", "")
-            user_added = track_item.get("added_by", {}).get("id", "")
-            time_added = track_item.get("added_at", "")
+            track_info = {
+                "track_id": track["id"],
+                "track_name": track["name"],
+                "artist_name": track["artists"][0]["name"],
+                "album_name": track["album"]["name"],
+                "url": track["external_urls"]["spotify"],
+            }
 
-            self.db.add_track(
-                track_id,
-                track_name,
-                track_url,
-                track_uri,
-                preview_url,
-                track_popularity,
-                album_id,
-                album_name,
-                album_url,
-                artist_id,
-                artist_name,
-                artist_url,
-                is_explicit,
-                is_local,
-                disc_number,
-                isrc_code,
-                playlist_id,
-                user_added,
-                time_added,
-            )
+            try:
+                self.db.add_track(
+                    track_id=track_info["track_id"],
+                    track_name=track_info["track_name"],
+                    track_url=track_info["url"],
+                    track_uri=track["uri"],
+                    preview_url=track.get("preview_url", ""),
+                    track_popularity=track.get("popularity", 0),
+                    album_id=track["album"]["id"],
+                    album_name=track_info["album_name"],
+                    album_url=track["album"]["external_urls"]["spotify"],
+                    artist_id=track["artists"][0]["id"],
+                    artist_name=track_info["artist_name"],
+                    artist_url=track["artists"][0]["external_urls"]["spotify"],
+                    is_explicit=track.get("explicit", False),
+                    is_local=track.get("is_local", False),
+                    disc_number=track.get("disc_number", 0),
+                    isrc_code=track.get("external_ids", {}).get("isrc", ""),
+                    playlist_id=playlist_id,
+                    user_added=track_item.get("added_by", {}).get("id", ""),
+                    time_added=track_item.get("added_at", ""),
+                )
 
-            print(f"{action} track '{track_name}' by '{artist_name}'.")
+                added_tracks.append(track_info)
+            except Exception as e:
+                raise RuntimeError(f"Failed to add track '{track_info['track_name']}': {e}") from e
 
-    def add_playlist_to_db(self, playlist_id, playlist_data, action="Added"):
+        return {"status": "success", "added_tracks": added_tracks}
+
+    def add_playlist_to_db(self, playlist_id: str, playlist_data: dict) -> dict:
         """
         Add playlist metadata to the database.
 
         :param playlist_id: The Spotify playlist ID.
         :param playlist_data: A dictionary containing playlist metadata fetched from Spotify.
-        :param action: A string describing the action being performed (default: "Added").
-        """
-
-        name = playlist_data.get("name", "Unknown Playlist")
-        owner_id = playlist_data.get("owner", {}).get("id", "unknown_owner_owner")
-        owner = playlist_data.get("owner", {}).get("display_name", "Unknown Owner")
-        owner_url = playlist_data.get("owner", {}).get("external_urls", {}).get("spotify", "")
-        description = playlist_data.get("description", "")
-        url = playlist_data["external_urls"]["spotify"]
-        public = playlist_data.get("public", False)
-        followers_total = playlist_data.get("followers", {}).get("total", 0)
-        snapshot_id = playlist_data.get("snapshot_id", "")
-        playlist_image_url = playlist_data.get("images", [{}])[0].get("url", "")
-        track_count = playlist_data.get("tracks", {}).get("total", 0)
-        colaborative = playlist_data.get("collaborative", False)
-
-        self.db.add_playlist(
-            playlist_id,
-            name,
-            owner_id,
-            owner,
-            owner_url,
-            description,
-            url,
-            public,
-            followers_total,
-            snapshot_id,
-            playlist_image_url,
-            track_count,
-            colaborative,
-        )
-
-        print(f"{action} metadata of playlist '{name}' to database.")
-
-    def add_playlist(self, playlist_identifier):
-        """
-        Add a Spotify playlist to the database by URL or ID.
-
-        Fetches playlist metadata and tracks from Spotify, then stores them in the database.
-
-        :param playlist_identifier: A Spotify playlist URL or ID.
-        :raises RuntimeError: If an error occurs during the addition process.
+        :return: A summary of the operation.
         """
 
         try:
-            playlist_id = extract_playlist_id(playlist_identifier)
-            print("Adding playlist to the database...")
+            playlist_info = {
+                "playlist_id": playlist_id,
+                "name": playlist_data.get("name", "Unknown Playlist"),
+                "description": playlist_data.get("description", ""),
+                "owner_name": playlist_data.get("owner", {}).get("display_name", "Unknown Owner"),
+                "url": playlist_data["external_urls"]["spotify"],
+                "track_count": playlist_data.get("tracks", {}).get("total", 0),
+            }
 
-            playlist_data = self._get_playlist_data(playlist_id)
-            self.add_playlist_to_db(playlist_id, playlist_data)
+            # pylint: disable=line-too-long
+            self.db.add_playlist(
+                playlist_id=playlist_id,
+                name=playlist_info["name"],
+                owner_id=playlist_data.get("owner", {}).get("id", ""),
+                owner_name=playlist_info["owner_name"],
+                owner_url=playlist_data.get("owner", {}).get("external_urls", {}).get("spotify", ""),
+                description=playlist_info["description"],
+                url=playlist_info["url"],
+                snapshot_id=playlist_data.get("snapshot_id", ""),
+                playlist_image_url=playlist_data.get("images", [{}])[0].get("url", ""),
+                followers_total=playlist_data.get("followers", {}).get("total", 0),
+                track_count=playlist_info["track_count"],
+                public=playlist_data.get("public", False),
+                colaborative=playlist_data.get("collaborative", False),
+            )
 
-            tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
-            self.add_tracks_to_db(playlist_id, tracks_data)
-
-            playlist_name = playlist_data.get("name", "Unknown Playlist")
-            print(f"Playlist '{playlist_name}' added with tracks successfully.")
+            return {"status": "success", "playlist": playlist_info}
         except Exception as e:
-            raise RuntimeError(f"Failed to add playlist: {e}") from e
+            raise RuntimeError(f"Failed to add playlist metadata: {e}") from e
+
+    def add_playlist(self, playlist_identifier: str) -> dict:
+        """
+        Add a Spotify playlist to the database by URL or ID.
+
+        :param playlist_identifier: A Spotify playlist URL or ID.
+        :return: A summary of the operation.
+        :raises RuntimeError: If an error occurs during the addition process.
+        """
+        try:
+            playlist_id = extract_playlist_id(playlist_identifier)
+            playlist_data = self._get_playlist_data(playlist_id)
+
+            playlist_summary = self.add_playlist_to_db(playlist_id, playlist_data)
+            tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
+            tracks_summary = self.add_tracks_to_db(playlist_id, tracks_data)
+
+            return {
+                "status": "created",
+                "playlist_summary": playlist_summary,
+                "tracks_summary": tracks_summary,
+            }
+        except Exception as e:
+            raise RuntimeError(f"Failed to add playlist '{playlist_identifier}': {e}") from e
 
 
 @click.command()
@@ -184,10 +178,16 @@ def add(playlist):
 
     :param playlist: The Spotify playlist URL or ID.
     """
-
     access_token = Auth(CONFIG).get_access_token()
     db = Database(CONFIG)
     spotify_api = SpotifyAPI(access_token)
     add_manager = AddManager(db, spotify_api)
 
-    add_manager.add_playlist(playlist)
+    result = add_manager.add_playlist(playlist)
+
+    if result["status"] == "created":
+        print("Playlist added successfully.")
+        print(f"Playlist: {result['playlist_summary']['playlist']['name']}")
+        print(f"Tracks added: {len(result['tracks_summary']['added_tracks'])}")
+    else:
+        print("Error: Unexpected result: Add incomplete.")
