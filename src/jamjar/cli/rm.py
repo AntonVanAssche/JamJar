@@ -35,44 +35,49 @@ class RemoveManager:
 
         self.db = db
 
-    def remove_playlist(self, playlist_id):
+    def remove_playlist(self, playlist_id: str) -> dict:
         """
         Remove a playlist and all its associated tracks from the database.
 
         :param playlist_id: The unique identifier of the playlist to remove.
-        :raises RuntimeError: If an error occurs during playlist removal.
         """
 
         try:
             playlist = self.db.fetch_playlists(playlist_id)
             if not playlist:
-                print(f"Playlist with ID '{playlist_id.playlist_id}' not found.")
-                return
-
-            print(f"Removing playlist with ID {playlist_id}...")
+                raise ValueError(f"Playlist with ID '{playlist_id}' not found.")
 
             self.db.delete_playlist(playlist_id)
-            print(f"Playlist '{playlist.playlist_name}' (ID: {playlist_id}) removed successfully.")
+
+            return {
+                "status": "removed",
+                "playlist_removed": playlist.playlist_name,
+            }
         except Exception as e:
             raise RuntimeError(f"Failed to remove playlist: {e}") from e
 
-    def remove_track(self, playlist_id, track_id):
+    def remove_track(self, playlist_id: str, track_id: str) -> dict:
         """
         Remove a specific track from a playlist in the database.
 
         :param playlist_id: The unique identifier of the playlist containing the track.
         :param track_id: The unique identifier of the track to remove.
-        :raises RuntimeError: If an error occurs during track removal.
         """
 
         try:
-            track = self.db.fetch_track_by_id(playlist_id, track_id)
+            print(playlist_id, track_id)
+            track = self.db.fetch_tracks(playlist_id, track_id)
+            print(track)
             if not track:
-                print(f"Track with ID '{track_id}' not found in playlist '{playlist_id}'.")
-                return
+                err_msg = f"Track with ID '{track_id}' not found in playlist '{playlist_id}'."
+                raise ValueError(err_msg)
 
             self.db.delete_track(track_id, playlist_id)
-            print(f"Removed track '{track.track_name}' by '{track.artist_name}'.")
+
+            return {
+                "status": "removed",
+                "removed_track": track.track_name,
+            }
         except Exception as e:
             raise RuntimeError(f"Failed to remove track: {e}") from e
 
@@ -97,22 +102,26 @@ def rm(playlist_id=None, track_id=None, all=False, force=False):
     :param force: Flag to force removal without confirmation (only for --all).
     :raises click.BadParameter: If neither playlist_id nor --all is provided.
     """
-
     if not playlist_id and not all:
         raise click.BadParameter("Please provide a playlist ID or use the --all option.")
 
     db = Database(CONFIG)
     remove_manager = RemoveManager(db)
+
     if all:
         if not force:
-            prompt = "Are you sure you want to remove all playlists and tracks? (y/N): "
-            confirmation = input(prompt)
+            prompt_message = "Are you sure you want to remove all playlists and tracks? (y/N)"
+            confirmation = click.prompt(prompt_message, default="n")
             if confirmation.lower() != "y":
                 print("Aborted.")
                 return
         db.delete_all_playlists()
         print("All playlists and tracks removed successfully.")
     elif track_id:
-        remove_manager.remove_track(playlist_id, track_id)
+        result = remove_manager.remove_track(playlist_id, track_id)
+        if result["status"] == "removed":
+            print(f"Track '{result['removed_track']}' removed successfully.")
     else:
-        remove_manager.remove_playlist(playlist_id)
+        result = remove_manager.remove_playlist(playlist_id)
+        if result["status"] == "removed":
+            print(f"Playlist '{result['message']}' removed successfully.")

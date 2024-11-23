@@ -37,11 +37,11 @@ class PullManager:
         :param db: An instance of the Database class for database operations.
         :param spotify_api: An instance of the SpotifyAPI class for Spotify operations.
         """
-
         self.db = db
         self.spotify_api = spotify_api
+        self.add_manager = AddManager(db, spotify_api)
 
-    def pull_playlist(self, playlist_identifier: str, rm: bool = False):
+    def pull_playlist(self, playlist_identifier: str, rm: bool = False) -> dict:
         """
         Synchronize a playlist with Spotify.
 
@@ -51,37 +51,40 @@ class PullManager:
         :param playlist_identifier: The Spotify playlist ID or URL to synchronize.
         :param rm: If True, remove tracks from the database that are no longer
                    present in the Spotify playlist.
-        :raises ValueError: If the specified playlist cannot be found on Spotify.
-        :raises RuntimeError: If the synchronization process fails.
+        :return: A summary of the synchronization operation.
         """
-
         try:
-            add_manager = AddManager(self.db, self.spotify_api)
             playlist_id = extract_playlist_id(playlist_identifier)
-            print(f"Pulling changes fo playlist with ID {playlist_id}...")
 
             spotify_playlist = self.spotify_api.get_playlist(playlist_id)
             if not spotify_playlist:
                 raise ValueError(f"Playlist with ID {playlist_id} not found on Spotify.")
 
             if not self.db.fetch_playlists(playlist_id):
-                print(f"Playlist with ID {playlist_id} not found in the database.")
-                AddManager(self.db, self.spotify_api).add_playlist(playlist_id)
-                return
+                add_result = self.add_manager.add_playlist(playlist_identifier)
+                return add_result
 
-            action = "Pulled"
             playlist_data = self.spotify_api.get_playlist(playlist_id)
             tracks_data = self.spotify_api.get_playlist_tracks(playlist_id)
 
-            add_manager.add_playlist_to_db(playlist_id, playlist_data, action)
-            add_manager.add_tracks_to_db(playlist_id, tracks_data, action)
+            playlist_result = self.add_manager.add_playlist_to_db(playlist_id, playlist_data)
+            added_tracks_result = self.add_manager.add_tracks_to_db(playlist_id, tracks_data)
+            return_result = {
+                "status": "updated",
+                "playlist": playlist_result,
+                "tracks": {"added": added_tracks_result["added_tracks"]},
+            }
 
             if rm:
-                self._remove_deleted_tracks(playlist_id, tracks_data)
+                removed_tracks_result = self._remove_deleted_tracks(playlist_id, tracks_data)
+                return_result["tracks"]["removed"] = removed_tracks_result["removed_tracks"]
+
+            return return_result
+
         except Exception as e:
             raise RuntimeError(f"Failed to sync playlist: {e}") from e
 
-    def _remove_deleted_tracks(self, playlist_id: str, spotify_tracks: dict):
+    def _remove_deleted_tracks(self, playlist_id: str, spotify_tracks: dict) -> dict:
         """
         Remove tracks from the database that are no longer in the Spotify playlist.
 
@@ -90,17 +93,20 @@ class PullManager:
 
         :param playlist_id: The Spotify playlist ID.
         :param spotify_tracks: A dictionary of tracks fetched from Spotify.
-        :raises RuntimeError: If the track removal process fails.
+        :return: A summary of the track removal operation.
         """
-
         try:
             rm_manager = RemoveManager(self.db)
-            spotify_track_ids = {item["track"]["id"] for item in spotify_tracks["items"]}
+            spotify_track_ids = {item["track"]["id"] for item in spotify_tracks.get("items", [])}
             local_tracks = self.db.fetch_tracks(playlist_id)
+            removed_tracks = []
 
             for local_track in local_tracks:
                 if local_track.track_id not in spotify_track_ids:
-                    rm_manager.remove_track(playlist_id, local_track.track_id)
+                    removed_track = rm_manager.remove_track(playlist_id, local_track.track_id)
+                    removed_tracks.append(removed_track)
+
+            return {"status": "removed", "removed_tracks": removed_tracks}
         except Exception as e:
             raise RuntimeError(f"Failed to remove deleted tracks: {e}") from e
 
@@ -120,10 +126,22 @@ def pull(playlist, rm=False):
     :param playlist: The Spotify playlist ID or URL to synchronize.
     :param rm: If provided, removes tracks no longer in the Spotify playlist.
     """
-
     access_token = Auth(CONFIG).get_access_token()
     db = Database(CONFIG)
     spotify_api = SpotifyAPI(access_token)
     pull_manager = PullManager(db, spotify_api)
 
-    pull_manager.pull_playlist(playlist, rm)
+    result = pull_manager.pull_playlist(playlist, rm)
+
+    if result["status"] == "created":
+        print("Playlist created in the database.")
+        print(f"Playlist: {result['data']['playlist_summary']['playlist']['name']}")
+    elif result["status"] == "updated":
+        print("Playlist synchronized successfully.")
+        print(f"Playlist: {result['playlist']['playlist']['name']}")
+        print(f"Tracks updated: {len(result['tracks']['added'])}")
+
+        if rm:
+            print(f"Tracks removed: {len(result['tracks']['removed'])}")
+    else:
+        print("Error: Unexpected result: Sync incomplete.")
