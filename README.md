@@ -37,12 +37,13 @@ maintaining a bit of structure and fun.
 ### From PackageCloud
 
 JamJar can be installed in two ways: via PackageCloud or by building it from
-source. Using PackageCloud is the simplest and most user-friendly option,
-though it’s not available on all platforms. Currently, only Red Hat-based
-systems (like Fedora) and the Python Package Index (PyPI) are supported.
+source. The PackageCloud repository hosts both the Python package (compatible
+with most systems) and RPM packages for Red Hat-based systems like Fedora. This
+makes using the PackageCloud repository the easiest and most versatile installation
+option.
 
-For further instructions, visit the PackageCloud repository:
-<https://packagecloud.io/AntonVanAssche/JamJar>
+For more details and installation instructions, visit the JamJar repository on
+PackageCloud: <https://packagecloud.io/AntonVanAssche/JamJar>
 
 ### From Source
 
