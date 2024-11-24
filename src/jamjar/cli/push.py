@@ -150,16 +150,24 @@ class PushManager:
             if not response_add_tracks:
                 raise RuntimeError("Failed to add tracks to the playlist.")
 
-            if image:
-                image_data = self._encode_image(image)
-                self._post_image(playlist_id, image_data)
-
-            return {
+            return_message = {
                 "playlist_id": playlist_id,
                 "playlist_url": playlist_url,
                 "track_count": len(track_uris),
-                "image_uploaded": bool(image),
+                "public": public,
+                "image_uploaded": False,
             }
+
+            if image:
+                image_data = self._encode_image(image)
+                response_add_image = self._post_image(playlist_id, image_data)
+
+                if not response_add_image:
+                    raise RuntimeError("Failed to upload cover image to the playlist.")
+
+                return_message["image_uploaded"] = True
+
+            return return_message
 
         except Exception as e:
             raise RuntimeError(f"Failed to push playlist: {e}") from e
@@ -195,7 +203,7 @@ def push(playlist_id, name, description, public, image):
         result = push_manager.push_playlist(playlist_id, name, description, public, image)
         print(f"Playlist created: {result['playlist_url']}")
         print(f"Tracks added: {result['track_count']}")
-        if result["image_uploaded"]:
-            print("Cover image uploaded successfully.")
+        print(f"Public: {result['public']}")
+        print(f"Cover image uploaded: {result['image_uploaded']}")
     except RuntimeError as e:
         print(f"Error: {e}")
