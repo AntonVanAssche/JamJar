@@ -195,10 +195,6 @@ def push(playlist_id, name, description, public, image):
         prompt = "Enter a name for the new playlist"
         name = click.prompt(prompt, type=str)
 
-    if not description:
-        prompt = "Enter a description for the new playlist"
-        description = click.prompt(prompt, type=str)
-
     try:
         result = push_manager.push_playlist(playlist_id, name, description, public, image)
         print(f"Playlist created: {result['playlist_url']}")
