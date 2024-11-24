@@ -154,6 +154,7 @@ class PushManager:
                 "playlist_id": playlist_id,
                 "playlist_url": playlist_url,
                 "track_count": len(track_uris),
+                "public": public,
                 "image_uploaded": False,
             }
 
@@ -202,6 +203,7 @@ def push(playlist_id, name, description, public, image):
         result = push_manager.push_playlist(playlist_id, name, description, public, image)
         print(f"Playlist created: {result['playlist_url']}")
         print(f"Tracks added: {result['track_count']}")
+        print(f"Public: {result['public']}")
         print(f"Cover image uploaded: {result['image_uploaded']}")
     except RuntimeError as e:
         print(f"Error: {e}")
