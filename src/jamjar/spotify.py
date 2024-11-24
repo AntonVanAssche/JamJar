@@ -130,4 +130,4 @@ class SpotifyAPI:
         if response.status_code != 202:
             raise SpotifyHTTPError(response)
 
-        return "Image uploaded successfully"
+        return response
