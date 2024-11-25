@@ -51,7 +51,7 @@ class RemoveManager:
 
             return {
                 "status": "removed",
-                "playlist_removed": playlist.playlist_name,
+                "removed_playlist": playlist.playlist_name,
             }
         except Exception as e:
             raise RuntimeError(f"Failed to remove playlist: {e}") from e
@@ -124,4 +124,4 @@ def rm(playlist_id=None, track_id=None, all=False, force=False):
     else:
         result = remove_manager.remove_playlist(playlist_id)
         if result["status"] == "removed":
-            print(f"Playlist '{result['message']}' removed successfully.")
+            print(f"Playlist '{result['removed_playlist']}' removed successfully.")
