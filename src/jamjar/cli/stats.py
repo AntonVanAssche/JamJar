@@ -69,7 +69,6 @@ class StatsManager:
         total_tracks = self.db.count_tracks()
         unique_tracks = self.db.count_unique_tracks()
         total_artists = self.db.count_artists()
-        unique_artists = self.db.count_unique_artists()
         total_users = self.db.count_users()
 
         return {
@@ -77,7 +76,6 @@ class StatsManager:
             "total_tracks": total_tracks,
             "unique_tracks": unique_tracks,
             "total_artists": total_artists,
-            "unique_artists": unique_artists,
             "total_users": total_users,
         }
 
