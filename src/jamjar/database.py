@@ -427,18 +427,6 @@ class Database:
         except sqlite3.Error as e:
             raise DatabaseError(e) from e
 
-    def count_unique_artists(self) -> int:
-        """Fetch the total number of unique artists in the database."""
-        try:
-            with self.connection:
-                return self.connection.execute(
-                    """
-                    SELECT COUNT(DISTINCT artist_name) FROM spotify_tracks
-                    """
-                ).fetchone()[0]
-        except sqlite3.Error as e:
-            raise DatabaseError(e) from e
-
     def count_unique_tracks(self) -> List[str]:
         """Count the number of unique spotify_tracks in the database."""
         try:
