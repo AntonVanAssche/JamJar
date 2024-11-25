@@ -7,42 +7,24 @@ This module defines the dataclasses used in the JamJar CLI.
 from dataclasses import dataclass
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class Playlist:
     """Dataclass for storing playlist information."""
 
-    # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-instance-attributes
-    # pylint: disable-msg=too-many-positional-arguments
-    def __init__(
-        self,
-        playlist_id,
-        playlist_name,
-        owner_id,
-        owner_name,
-        owner_url,
-        playlist_url,
-        description,
-        public,
-        followers_total,
-        snapshot_id,
-        playlist_image_url,
-        track_count,
-        colaborative,
-    ):
-        self.playlist_id = playlist_id
-        self.playlist_name = playlist_name
-        self.owner_id = owner_id
-        self.owner_name = owner_name
-        self.owner_url = owner_url
-        self.playlist_url = playlist_url
-        self.description = description
-        self.public = public
-        self.followers_total = followers_total
-        self.snapshot_id = snapshot_id
-        self.playlist_image_url = playlist_image_url
-        self.track_count = track_count
-        self.colaborative = colaborative
+    playlist_id: str
+    playlist_name: str
+    owner_id: str
+    owner_name: str
+    owner_url: str
+    playlist_url: str
+    description: str
+    public: bool
+    followers_total: int
+    snapshot_id: str
+    playlist_image_url: str
+    track_count: int
+    colaborative: bool
 
     def _asdict(self):
         """Return the playlist data as a dictionary."""
@@ -63,55 +45,30 @@ class Playlist:
         }
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class Track:
     """Dataclass for storing track information."""
 
-    # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-instance-attributes
-    # pylint: disable-msg=too-many-positional-arguments
-    # pylint: disable-msg=too-many-locals
-    def __init__(
-        self,
-        track_id,
-        track_name,
-        track_url,
-        track_uri,
-        preview_url,
-        track_popularity,
-        album_id,
-        album_name,
-        album_url,
-        artist_id,
-        artist_name,
-        artist_url,
-        is_explicit,
-        is_local,
-        disc_number,
-        isrc_code,
-        playlist_id,
-        user_added,
-        time_added,
-    ):
-        self.track_id = track_id
-        self.track_name = track_name
-        self.track_url = track_url
-        self.track_uri = track_uri
-        self.preview_url = preview_url
-        self.track_popularity = track_popularity
-        self.album_id = album_id
-        self.album_name = album_name
-        self.album_url = album_url
-        self.artist_id = artist_id
-        self.artist_name = artist_name
-        self.artist_url = artist_url
-        self.is_explicit = is_explicit
-        self.is_local = is_local
-        self.disc_number = disc_number
-        self.isrc_code = isrc_code
-        self.playlist_id = playlist_id
-        self.user_added = user_added
-        self.time_added = time_added
+    track_id: str
+    track_name: str
+    track_url: str
+    track_uri: str
+    preview_url: str
+    track_popularity: int
+    album_id: str
+    album_name: str
+    album_url: str
+    artist_id: str
+    artist_name: str
+    artist_url: str
+    is_explicit: bool
+    is_local: bool
+    disc_number: int
+    isrc_code: str
+    playlist_id: str
+    user_added: str
+    time_added: str
 
     def _asdict(self):
         """Return the track data as a dictionary."""
