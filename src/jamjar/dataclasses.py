@@ -7,6 +7,7 @@ This module defines the dataclasses used in the JamJar CLI.
 from dataclasses import dataclass
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class Playlist:
     """Dataclass for storing playlist information."""
@@ -44,6 +45,7 @@ class Playlist:
         }
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class Track:
     """Dataclass for storing track information."""
