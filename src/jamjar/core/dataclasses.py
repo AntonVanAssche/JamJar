@@ -4,6 +4,7 @@
 This module defines the dataclasses used in the JamJar CLI.
 """
 
+# pylint: disable=import-self
 from dataclasses import dataclass
 
 

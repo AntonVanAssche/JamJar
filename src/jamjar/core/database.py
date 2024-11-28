@@ -11,8 +11,8 @@ import sqlite3
 from pathlib import Path
 from typing import List, Optional, Union
 
-from jamjar.config import Config
-from jamjar.dataclasses import Playlist, Track
+from jamjar.core.config import Config
+from jamjar.core.dataclasses import Playlist, Track
 
 
 class DatabaseError(Exception):
