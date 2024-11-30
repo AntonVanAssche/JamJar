@@ -24,26 +24,6 @@ class SpotifyHTTPError(SpotifyError):
         super().__init__(self.message)
 
 
-class SpotifyJobError(SpotifyError):
-    """Raised when there's a job error on Spotify"""
-
-    def __init__(self, device, job):
-        self.device = device
-        self.job = job
-        self.message = f"Job error on device {device}: {job}"
-        super().__init__(self.message)
-
-
-class SpotifyJobTimeoutError(SpotifyError):
-    """Raised when a Spotify job times out"""
-
-    def __init__(self, device, job):
-        self.device = device
-        self.job = job
-        self.message = f"Spotify job on device {device} timed out: {job}"
-        super().__init__(self.message)
-
-
 class SpotifyAPI:
     """
     Handles the Spotify API requests for the JamJar CLI.
