@@ -11,12 +11,16 @@ import sqlite3
 from pathlib import Path
 from typing import List, Optional, Union
 
-from jamjar.config import Config
-from jamjar.dataclasses import Playlist, Track
+from jamjar.core.config import Config
+from jamjar.core.dataclasses import Playlist, Track
 
 
 class DatabaseError(Exception):
-    """Custom exception for database-related errors."""
+    """Exception raised for errors in the Database class."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 
 # pylint: disable=too-many-public-methods
@@ -521,9 +525,9 @@ class Database:
             with self.connection:
                 rows = self.connection.execute(
                     """
-                    SELECT p.name, t.name, t.artist, t.user_added, t.time_added
+                    SELECT p.playlist_name, t.track_name, t.artist_name, t.user_added, t.time_added
                     FROM spotify_tracks t
-                    JOIN playlists p ON t.playlist_id = p.id
+                    JOIN spotify_playlist p ON t.playlist_id = p.playlist_id
                     ORDER BY t.time_added DESC
                     LIMIT ?
                     """,

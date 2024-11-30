@@ -18,29 +18,9 @@ class SpotifyError(Exception):
 class SpotifyHTTPError(SpotifyError):
     """Raised when the Spotify API returns an HTTP error"""
 
-    def __init__(self, response):
+    def __init__(self, response: requests.Response):
         self.status_code = response.status_code
         self.message = f"Spotify API returned status code {self.status_code}: {response.text}"
-        super().__init__(self.message)
-
-
-class SpotifyJobError(SpotifyError):
-    """Raised when there's a job error on Spotify"""
-
-    def __init__(self, device, job):
-        self.device = device
-        self.job = job
-        self.message = f"Job error on device {device}: {job}"
-        super().__init__(self.message)
-
-
-class SpotifyJobTimeoutError(SpotifyError):
-    """Raised when a Spotify job times out"""
-
-    def __init__(self, device, job):
-        self.device = device
-        self.job = job
-        self.message = f"Spotify job on device {device} timed out: {job}"
         super().__init__(self.message)
 
 
@@ -85,7 +65,7 @@ class SpotifyAPI:
 
         response = requests.get(url, headers=headers, timeout=10)
         if response.status_code != 200:
-            raise SpotifyHTTPError
+            raise SpotifyHTTPError(response)
 
         return response.json()["id"]
 
