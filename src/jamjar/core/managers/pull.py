@@ -15,6 +15,14 @@ from jamjar.core.spotify import SpotifyAPI
 from jamjar.core.utils import extract_playlist_id
 
 
+class PullError(Exception):
+    """Exception raised for errors in the PullManager class."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 # pylint: disable=too-few-public-methods
 class PullManager:
     """
@@ -52,7 +60,7 @@ class PullManager:
 
             spotify_playlist = self.spotify_api.get_playlist(playlist_id)
             if not spotify_playlist:
-                raise ValueError(f"Playlist with ID {playlist_id} not found on Spotify.")
+                raise PullError(f"Playlist with ID {playlist_id} not found on Spotify.")
 
             if not self.db.fetch_playlists(playlist_id):
                 add_result = self.add_manager.add_playlist(playlist_identifier)
@@ -76,7 +84,7 @@ class PullManager:
             return return_result
 
         except Exception as e:
-            raise RuntimeError(f"Failed to sync playlist: {e}") from e
+            raise PullError(f"Failed to sync playlist: {e}") from e
 
     def _remove_deleted_tracks(self, playlist_id: str, spotify_tracks: dict) -> dict:
         """
@@ -102,4 +110,4 @@ class PullManager:
 
             return {"status": "removed", "removed_tracks": removed_tracks}
         except Exception as e:
-            raise RuntimeError(f"Failed to remove deleted tracks: {e}") from e
+            raise PullError(f"Failed to remove deleted tracks: {e}") from e
