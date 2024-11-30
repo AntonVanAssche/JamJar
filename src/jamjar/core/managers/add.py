@@ -12,6 +12,14 @@ from jamjar.core.spotify import SpotifyAPI
 from jamjar.core.utils import extract_playlist_id
 
 
+class AddError(Exception):
+    """Exception raised for errors in the AddManager class."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 class AddManager:
     """
     Handles adding Spotify playlists and tracks to the JamJar database.
@@ -91,7 +99,7 @@ class AddManager:
 
                 added_tracks.append(track_info)
             except Exception as e:
-                raise RuntimeError(f"Failed to add track '{track_info['track_name']}': {e}") from e
+                raise AddError(f"Failed to add track '{track_info['track_name']}': {e}") from e
 
         return {"status": "success", "added_tracks": added_tracks}
 
@@ -133,7 +141,7 @@ class AddManager:
 
             return {"status": "success", "playlist": playlist_info}
         except Exception as e:
-            raise RuntimeError(f"Failed to add playlist metadata: {e}") from e
+            raise AddError(f"Failed to add playlist metadata: {e}") from e
 
     def add_playlist(self, playlist_identifier: str) -> dict:
         """
@@ -141,7 +149,7 @@ class AddManager:
 
         :param playlist_identifier: A Spotify playlist URL or ID.
         :return: A summary of the operation.
-        :raises RuntimeError: If an error occurs during the addition process.
+        :raises AddError: If an error occurs during the addition process.
         """
         try:
             playlist_id = extract_playlist_id(playlist_identifier)
@@ -157,4 +165,4 @@ class AddManager:
                 "tracks_summary": tracks_summary,
             }
         except Exception as e:
-            raise RuntimeError(f"Failed to add playlist '{playlist_identifier}': {e}") from e
+            raise AddError(f"Failed to add playlist '{playlist_identifier}': {e}") from e
