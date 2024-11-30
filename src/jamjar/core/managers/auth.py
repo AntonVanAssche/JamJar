@@ -18,6 +18,14 @@ import requests
 from jamjar.core.config import Config
 
 
+class AuthError(Exception):
+    """Exception raised for authentication errors."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 class Auth:
     """
     Handles the Spotify authentication flow.
@@ -84,12 +92,12 @@ class Auth:
                             self.end_headers()
                             self.wfile.write(b"Authentication failed. Please try again.")
                             self.server.token_info = {"error": error_message}
-                            raise RuntimeError(f"Authentication error received: {error_message}")
+                            raise AuthError(f"Authentication error received: {error_message}")
 
                     except Exception as e:
                         self.send_response(500)
                         self.end_headers()
-                        raise RuntimeError(f"Failed to handle callback request: {e}") from e
+                        raise AuthError(f"Failed to handle callback request: {e}") from e
 
                 # pylint: disable=redefined-builtin
                 def log_message(self, format, *args) -> None:
@@ -101,7 +109,7 @@ class Auth:
             server.handle_request()
             return getattr(server, "token_info", None)
         except Exception as e:
-            raise RuntimeError(f"Failed to start HTTP server: {e}") from e
+            raise AuthError(f"Failed to start HTTP server: {e}") from e
 
     def get_token(self, code: str) -> dict:
         """Exchanges the authorization code for an access token."""
@@ -165,7 +173,7 @@ class Auth:
         """Returns the access token."""
         token_info = self.load_token()
         if not token_info:
-            raise RuntimeError("Access token not found. Please log in.")
+            raise AuthError("Access token not found. Please log in.")
         if datetime.now().timestamp() > token_info["expires_at"]:
             token_info = self.refresh_token()
         return token_info["access_token"]
@@ -173,7 +181,7 @@ class Auth:
     def clean_token(self) -> dict:
         """Removes the saved access token."""
         if not os.path.exists(self.token_file):
-            raise RuntimeError("Access token not found.")
+            raise AuthError("Access token not found.")
 
         os.remove(self.token_file)
         return {"status": "success"}
