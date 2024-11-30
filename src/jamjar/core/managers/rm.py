@@ -11,7 +11,13 @@ This module provides functionality to:
 
 from jamjar.core.database import Database
 
-CONFIG = Config()
+
+class RemoveError(Exception):
+    """Exception raised for errors related to removing playlists or tracks."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 
 class RemoveManager:
@@ -42,7 +48,7 @@ class RemoveManager:
         try:
             playlist = self.db.fetch_playlists(playlist_id)
             if not playlist:
-                raise ValueError(f"Playlist with ID '{playlist_id}' not found.")
+                raise RemoveError(f"Playlist with ID '{playlist_id}' not found.")
 
             self.db.delete_playlist(playlist_id)
 
@@ -51,7 +57,7 @@ class RemoveManager:
                 "removed_playlist": playlist.playlist_name,
             }
         except Exception as e:
-            raise RuntimeError(f"Failed to remove playlist: {e}") from e
+            raise RemoveError(f"Failed to remove playlist: {e}") from e
 
     def remove_track(self, playlist_id: str, track_id: str) -> dict:
         """
@@ -67,7 +73,7 @@ class RemoveManager:
             print(track)
             if not track:
                 err_msg = f"Track with ID '{track_id}' not found in playlist '{playlist_id}'."
-                raise ValueError(err_msg)
+                raise RemoveError(err_msg)
 
             self.db.delete_track(track_id, playlist_id)
 
@@ -76,4 +82,4 @@ class RemoveManager:
                 "removed_track": track.track_name,
             }
         except Exception as e:
-            raise RuntimeError(f"Failed to remove track: {e}") from e
+            raise RemoveError(f"Failed to remove track: {e}") from e
