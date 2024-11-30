@@ -13,6 +13,14 @@ from jamjar.core.database import Database
 from jamjar.core.spotify import SpotifyAPI
 
 
+class PushError(Exception):
+    """Ecxeption raised when an error occurs during playlist pushing."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 # pylint: disable=too-few-public-methods
 class PushManager:
     """Manages the process of pushing a playlist to Spotify."""
@@ -119,11 +127,11 @@ class PushManager:
         try:
             playlist = self.db.fetch_playlists(playlist_id)
             if not playlist:
-                raise ValueError(f"Playlist with ID {playlist_id} not found.")
+                raise PushError(f"Playlist with ID {playlist_id} not found.")
 
             tracks = self.db.fetch_tracks(playlist_id)
             if not tracks:
-                raise ValueError(f"No tracks found for playlist with ID {playlist_id}.")
+                raise PushError(f"No tracks found for playlist with ID {playlist_id}.")
 
             user_id = self._get_user_id()
             playlist_data = {
@@ -134,7 +142,7 @@ class PushManager:
 
             response_create_playlist = self._post_playlist(user_id, playlist_data)
             if not response_create_playlist:
-                raise RuntimeError("Failed to create playlist on Spotify.")
+                raise PushError("Failed to create playlist on Spotify.")
 
             playlist_id = response_create_playlist["id"]
             playlist_url = response_create_playlist["external_urls"]["spotify"]
@@ -142,7 +150,7 @@ class PushManager:
             track_uris = [track.track_uri for track in tracks]
             response_add_tracks = self._post_playlist_tracks(playlist_id, track_uris)
             if not response_add_tracks:
-                raise RuntimeError("Failed to add tracks to the playlist.")
+                raise PushError("Failed to add tracks to the playlist.")
 
             return_message = {
                 "playlist_id": playlist_id,
@@ -157,11 +165,11 @@ class PushManager:
                 response_add_image = self._post_image(playlist_id, image_data)
 
                 if not response_add_image:
-                    raise RuntimeError("Failed to upload cover image to the playlist.")
+                    raise PushError("Failed to upload cover image to the playlist.")
 
                 return_message["image_uploaded"] = True
 
             return return_message
 
         except Exception as e:
-            raise RuntimeError(f"Failed to push playlist: {e}") from e
+            raise PushError(f"Failed to push playlist: {e}") from e
