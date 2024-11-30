@@ -521,9 +521,9 @@ class Database:
             with self.connection:
                 rows = self.connection.execute(
                     """
-                    SELECT p.name, t.name, t.artist, t.user_added, t.time_added
+                    SELECT p.playlist_name, t.track_name, t.artist_name, t.user_added, t.time_added
                     FROM spotify_tracks t
-                    JOIN playlists p ON t.playlist_id = p.id
+                    JOIN spotify_playlist p ON t.playlist_id = p.playlist_id
                     ORDER BY t.time_added DESC
                     LIMIT ?
                     """,
