@@ -65,7 +65,7 @@ class SpotifyAPI:
 
         response = requests.get(url, headers=headers, timeout=10)
         if response.status_code != 200:
-            raise SpotifyHTTPError
+            raise SpotifyHTTPError(response)
 
         return response.json()["id"]
 
