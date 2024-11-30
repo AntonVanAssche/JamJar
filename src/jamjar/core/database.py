@@ -16,7 +16,11 @@ from jamjar.core.dataclasses import Playlist, Track
 
 
 class DatabaseError(Exception):
-    """Custom exception for database-related errors."""
+    """Exception raised for errors in the Database class."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 
 # pylint: disable=too-many-public-methods
