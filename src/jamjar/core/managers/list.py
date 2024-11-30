@@ -13,6 +13,14 @@ from jamjar.core.database import Database
 from jamjar.core.utils import extract_playlist_id
 
 
+class ListError(Exception):
+    """Exception raised for errors in the ListManager class."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 # pylint: disable=too-few-public-methods
 class ListManager:
     """
@@ -44,12 +52,12 @@ class ListManager:
         try:
             playlists = self.db.fetch_playlists()
             if not playlists:
-                raise ValueError("No playlists found in the database.")
+                raise ListError("No playlists found in the database.")
 
             return {"playlists": [playlist._asdict() for playlist in playlists]}
 
         except Exception as e:
-            raise RuntimeError(f"Failed to list playlists: {e}") from e
+            raise ListError(f"Failed to list playlists: {e}") from e
 
     def list_tracks(self, playlist_id: str) -> dict:
         """
@@ -66,8 +74,8 @@ class ListManager:
             playlist_id = extract_playlist_id(playlist_id)
             tracks = self.db.fetch_tracks(playlist_id)
             if not tracks:
-                raise ValueError(f"No tracks found for playlist ID {playlist_id}.")
+                raise ListError(f"No tracks found for playlist ID {playlist_id}.")
 
             return {"tracks": [track._asdict() for track in tracks]}
         except Exception as e:
-            raise RuntimeError(f"Failed to list tracks: {e}") from e
+            raise ListError(f"Failed to list tracks: {e}") from e
