@@ -18,7 +18,7 @@ class SpotifyError(Exception):
 class SpotifyHTTPError(SpotifyError):
     """Raised when the Spotify API returns an HTTP error"""
 
-    def __init__(self, response):
+    def __init__(self, response: requests.Response):
         self.status_code = response.status_code
         self.message = f"Spotify API returned status code {self.status_code}: {response.text}"
         super().__init__(self.message)
