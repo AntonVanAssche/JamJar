@@ -12,6 +12,14 @@ import json
 from jamjar.core.database import Database
 
 
+class DumpError(Exception):
+    """Exception raised for errors in the dump process."""
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
 # pylint: disable=too-few-public-methods
 class DumpManager:
     """
@@ -73,4 +81,4 @@ class DumpManager:
                 "output_file": output_file,
             }
         except Exception as e:
-            raise RuntimeError(f"Failed to export playlist: {e}") from e
+            raise DumpError(f"Failed to export playlist: {e}") from e
