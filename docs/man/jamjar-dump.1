@@ -1,0 +1,71 @@
+.TH "JAMJAR-DUMP" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-DUMP"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar dump \- Export playlist data to a JSON file.
+
+.SH "SYNOPSIS"
+.B jamjar dump [\fBOPTIONS\fR] \fBIDENTIFIER\fR
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar dump\fR command exports metadata and associated tracks for a
+specified playlist into a JSON file. This is useful for backup purposes or to
+analyze playlist data outside the JamJar application.
+\fB--output\fR option.
+.RE
+
+.SH "ARGUMENTS"
+.RE
+\fBIDENTIFIER\fR
+.RS 4
+The unique identifier of the playlist to export.
+.PP
+
+.SH "OPTIONS"
+.RE
+\fB--output\fR, \fB-o\fR
+.RS 4
+Specify the file path where the JSON data will be saved. If not provided, the
+file will be saved in the current working directory with a default name based
+on the playlist name.
+.PP
+
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Display help information about the \fBjamjar dump\fR command.
+.PP
+
+.SH "EXAMPLES"
+.RE
+To export a playlist to a JSON file in the current directory:
+.RS 4
+.B $ jamjar dump 1A2B3C4D5E6F7G
+.RE
+
+To specify an output file for the exported data:
+.RS 4
+.B $ jamjar dump 1A2B3C4D5E6F7G --output ~/playlists/playlist1.json
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database storing playlist and track information. Data is fetched from this
+file when using \fBjamjar dump\fR.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar dump\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
