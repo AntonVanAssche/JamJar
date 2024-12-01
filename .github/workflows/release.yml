@@ -38,8 +38,10 @@ jobs:
 
       - name: Build rpm
         run: |
+          for f in /root/docs/man/*; do gzip -9 "${f}"; done
           rpmdev-setuptree
           cp -r /root/dist/* /github/home/rpmbuild/SOURCES
+          cp -r /root/docs/man/* /github/home/rpmbuild/SOURCES
           cp -r rpm_src/* /github/home/rpmbuild/SOURCES
           spectool --get-files --sourcedir package.spec
           rpmbuild -bb -v package.spec

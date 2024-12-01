@@ -45,6 +45,16 @@ option.
 For more details and installation instructions, visit the JamJar repository on
 PackageCloud: <https://packagecloud.io/AntonVanAssche/JamJar>
 
+When installing via the RPM package, the man-pages for JamJar's commands will
+also be included. You can access them with the following command:
+
+```console
+man jamjar
+```
+
+These man-pages provide detailed information on how to use each command and
+their respective options.
+
 ### From Source
 
 1. Clone the repository:
