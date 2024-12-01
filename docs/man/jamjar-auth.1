@@ -1,0 +1,84 @@
+.TH "JAMJAR-AUTH" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-AUTH"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar auth \- Manage authentication with Spotify for JamJar.
+
+.SH "SYNOPSIS"
+.B jamjar auth [\fICOMMAND\fR] [\fIOPTIONS\fR]
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar auth\fR command handles Spotify authentication for the JamJar CLI
+tool. This includes logging in, checking authentication status, and removing
+saved access tokens.
+.RE
+
+.SH "COMMANDS"
+.RE
+\fBlogin\fR
+.RS 4
+Log in to Spotify. Generates an authorization URL to authenticate JamJar with
+your Spotify account. Once authorized, a callback completes the process and
+saves the access token.
+.PP
+
+.RE
+\fBstatus\fR
+.RS 4
+Display the current authentication status. Shows whether the user is logged in,
+who they are logged in as, and when the access token expires.
+.PP
+
+.RE
+\fBclean\fR
+.RS 4
+Remove the saved Spotify access token. Useful for resetting or switching accounts.
+.PP
+
+.SH "OPTIONS"
+.TP
+\fB--help\fR, \fB-h\fR
+Display help information for the specified \fBjamjar auth\fR command.
+
+.SH "EXAMPLES"
+
+To log in to Spotify:
+.RS 4
+.B $ jamjar auth login
+.RE
+
+To check your current authentication status:
+.RS 4
+.B $ jamjar auth status
+.RE
+
+To remove saved authentication data:
+.RS 4
+.B $ jamjar auth clean
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.config/jamjar/config.json
+.RS 4
+Stores the configuration settings for JamJar, including the Spotify client ID
+and secret.
+.RE
+.B ~/.config/jamjar/token.json
+.RS 4
+Stores the Spotify access token and other authentication details.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar auth\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE

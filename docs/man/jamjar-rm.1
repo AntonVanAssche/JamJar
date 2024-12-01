@@ -1,0 +1,91 @@
+.TH "JAMJAR-RM" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-RM"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar rm \- Remove playlists or tracks from the JamJar database.
+
+.SH "SYNOPSIS"
+.B jamjar rm [\fBOPTIONS\fR] [\fBPLAYLIST_ID\fR]
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar rm\fR command removes playlists, individual tracks from playlist
+, or all playlists and tracks from the JamJar database. This operation can be
+performed with confirmation or forced using a flag.
+.RE
+
+.SH "ARGUMENTS"
+.RE
+\fBPLAYLIST_ID\fR
+.RS 4
+The unique identifier of the playlist to remove. This is optional but required
+unless the \fB--all\fR option is specified.
+.PP
+
+.SH "OPTIONS"
+.RE
+\fB--track-id\fR, \fB-t\fR
+.RS 4
+The unique identifier of the track to remove from a specific playlist.
+.PP
+
+.RE
+\fB--all\fR, \fB-a\fR
+.RS 4
+Remove all playlists and tracks from the database.
+.PP
+
+.RE
+\fB--force\fR, \fB-f\fR
+.RS 4
+Force removal without confirmation. Only applicable when using the \fB--all\fR
+option.
+.PP
+
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Display help information about the \fBjamjar rm\fR command.
+.PP
+
+.SH "EXAMPLES"
+.RE
+To remove a specific playlist:
+.RS 4
+.B $ jamjar rm 19RcUUR4b9oxhcREqD8Xoq
+.RE
+
+To remove a specific track from a playlist:
+.RS 4
+.B $ jamjar rm 19RcUUR4b9oxhcREqD8Xoq --track-id 4PTG3Z6ehGkBFwjybzWkR8
+.RE
+
+To remove all playlists and tracks (with confirmation):
+.RS 4
+.B $ jamjar rm --all
+.RE
+
+To force removal of all playlists and tracks without confirmation:
+.RS 4
+.B $ jamjar rm --all --force
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database storing playlist and track information. Data is removed from this
+file when using \fBjamjar rm\fR.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar rm\fR or the JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE

@@ -1,0 +1,94 @@
+.TH "JAMJAR-CONFIG" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-CONFIG"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+config.json \- Configuration file for the JamJar CLI.
+
+.SH "DESCRIPTION"
+The \fBconfig.json\fR file stores the configuration settings for the JamJar
+CLI tool. It contains essential information for authenticating and interacting
+with the Spotify API, including the Spotify client ID, client secret, and
+redirect URI.
+
+This file must be present for JamJar to function correctly, as it provides the
+necessary credentials for authenticating with Spotify.
+
+.RE
+
+.SH "CONFIGURABLE PROPERTIES"
+The following configuration values are configurable within the \fBconfig.json\fR file:
+
+.RE
+\fBclient_id\fR
+.RS 4
+The client ID for the Spotify API, required for authentication and
+authorization.
+.PP
+
+.RE
+\fBclient_secret\fR
+.RS 4
+The client secret for the Spotify API, used in conjunction with the client ID
+for authentication.
+.PP
+
+.RE
+\fBredirect_uri\fR
+.RS 4
+The URI to which Spotify will redirect after authorization. This is used
+during the OAuth flow to complete the authentication process.
+.PP
+
+.SH "DEFAULT LOCATIONS"
+The \fBjamjar config\fR file is typically located in the following directory:
+
+.RE
+.B ~/.config/jamjar/config.json
+.RS 4
+Stores the configuration settings for JamJar, including the Spotify client ID,
+client secret, and redirect URI.
+.RE
+
+.SH "FILES AND DIRECTORIES"
+The following additional files and directories are used by JamJar:
+
+.RE
+.B ~/.config/jamjar/token.json
+.RS 4
+Stores the Spotify access token and other authentication details (not
+configurable through the config file).
+.RE
+
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+Stores the database file containing the playlists, tracks, and other related
+data (not configurable through the config file).
+.RE
+
+.SH "EXAMPLES"
+To configure the JamJar CLI, edit the \fBconfig.json\fR file to include your
+Spotify client ID, client secret, and redirect URI.
+
+For example, a basic configuration might look like this:
+
+.EX
+{
+    "client_id": "your_client_id",
+    "client_secret": "your_client_secret",
+    "redirect_uri": "http://localhost:5000/callback"
+}
+.PE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar config\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE

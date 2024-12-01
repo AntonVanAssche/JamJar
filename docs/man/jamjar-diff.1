@@ -1,0 +1,78 @@
+.TH "JAMJAR-DIFF" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-DIFF"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar diff \- Compare a playlist's database state with its Spotify version.
+
+.SH "SYNOPSIS"
+.B jamjar diff [\fBOPTIONS\fR] \fBPLAYLIST\fR
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar diff\fR command compares a playlist stored in the JamJar
+database with its current state on Spotify. This allows you to see what
+changes have occurred, such as track additions or removals, or differences in
+metadata. All differences are displayed in a JSON format.
+
+If the \fB--details\fR option is specified, the command also shows detailed
+metadata differences between the playlist in the database and its version on
+Spotify.
+.RE
+
+.SH "ARGUMENTS"
+.RE
+\fBPLAYLIST\fR
+.RS 4
+The ID or URL of the Spotify playlist to compare.
+.PP
+
+.SH "OPTIONS"
+.RE
+\fB--details\fR, \fB-d\fR
+.RS 4
+Show detailed differences, including metadata changes such as playlist name, description, and visibility status.
+.PP
+
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Display help information about the \fBjamjar diff\fR command.
+.PP
+
+.SH "EXAMPLES"
+.RE
+To compare a playlist in the database with its version on Spotify:
+.RS 4
+.B $ jamjar diff 1A2B3C4D5E6F7G
+.RE
+
+To compare a playlist with detailed metadata differences:
+.RS 4
+.B $ jamjar diff 1A2B3C4D5E6F7G --details
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.config/jamjar/token.json
+.RS 4
+Stores the Spotify access token. Required to authenticate with Spotify when
+using \fBjamjar diff\fR.
+.RE
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database storing playlists and tracks. The playlist data compared in
+fBjamjar diff\fR is retrieved from this file.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar diff\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
