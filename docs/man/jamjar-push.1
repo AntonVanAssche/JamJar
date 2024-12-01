@@ -1,0 +1,100 @@
+.TH "JAMJAR-PUSH" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-PUSH"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar push \- Upload a playlist to Spotify.
+
+.SH "SYNOPSIS"
+.B jamjar push [\fBOPTIONS\fR] \fBPLAYLIST_ID\fR
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar push\fR command uploads a playlist from the JamJar database to
+your Spotify account. You can specify the playlist name, description,
+visibility, and even upload a custom cover image. This is useful for creating
+new playlists on Spotify with tracks managed in JamJar.
+.RE
+
+.SH "ARGUMENTS"
+.RE
+\fBPLAYLIST_ID\fR
+.RS 4
+The ID or URL of the playlist to upload to Spotify.
+.PP
+
+.SH "OPTIONS"
+.RE
+\fB--name\fR, \fB-n\fR
+.RS 4
+Set the name of the new playlist. If not provided, you will be prompted to
+enter one.
+.PP
+
+.RE
+\fB--description\fR, \fB-d\fR
+.RS 4
+Add a description to the playlist.
+.PP
+
+.RE
+\fB--public\fR, \fB-p\fR
+.RS 4
+Make the playlist public on Spotify. By default, the playlist will be private.
+.PP
+
+.RE
+\fB--image\fR, \fB-i\fR
+.RS 4
+Specify the path to an image file to use as the playlist cover. Due to
+limitations with the Spotify API, only JPEG images are accepted, which are
+smaller than 256 KB.
+.PP
+
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Display help information about the \fBjamjar push\fR command.
+.PP
+
+.SH "EXAMPLES"
+.RE
+To upload a playlist with default settings:
+.RS 4
+.B $ jamjar push 1A2B3C4D5E6F7G
+.RE
+
+To upload a playlist with a name, description, and set it as public:
+.RS 4
+.B $ jamjar push 1A2B3C4D5E6F7G --name 'My Playlist' --description 'My favorite tracks' --public
+.RE
+
+To upload a playlist with a custom cover image:
+.RS 4
+.B $ jamjar push 1A2B3C4D5E6F7G --image ~/Pictures/cover.jpg
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.config/jamjar/token.json
+.RS 4
+Stores the Spotify access token. Required to authenticate with Spotify when
+using \fBjamjar push\fR.
+.RE
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database storing playlists and tracks. Data for the specified playlist is
+retrieved from this file when using \fBjamjar push\fR.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar push\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
