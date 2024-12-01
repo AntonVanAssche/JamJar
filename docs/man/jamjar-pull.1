@@ -1,0 +1,77 @@
+.TH "JAMJAR-PULL" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-PULL"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar pull \- Synchronize a Spotify playlist with the JamJar database.
+
+.SH "SYNOPSIS"
+.B jamjar pull [\fBOPTIONS\fR] \fBPLAYLIST\fR
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar pull\fR command updates the JamJar database with the latest
+metadata and tracks from a specified Spotify playlist. Optionally, it can also
+remove tracks from the database that are no longer part of the playlist on Spotify.
+
+This ensures that the database remains in sync with the current state of the
+playlist on Spotify.
+.RE
+
+.SH "ARGUMENTS"
+.RE
+\fBPLAYLIST\fR
+.RS 4
+The ID or URL of the Spotify playlist to synchronize.
+.PP
+
+.SH "OPTIONS"
+.RE
+\fB--rm\fR, \fB-r\fR
+.RS 4
+Remove tracks from the database that are no longer part of the Spotify
+playlist.
+.PP
+
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Display help information about the \fBjamjar pull\fR command.
+.PP
+
+.SH "EXAMPLES"
+.RE
+To synchronize a Spotify playlist with the database:
+.RS 4
+.B $ jamjar pull 1A2B3C4D5E6F7G
+.RE
+
+To synchronize a playlist and remove tracks no longer in the playlist:
+.RS 4
+.B $ jamjar pull 1A2B3C4D5E6F7G --rm
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.config/jamjar/token.json
+.RS 4
+Stores the Spotify access token. Required to authenticate with Spotify when
+using \fBjamjar pull\fR.
+.RE
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database storing playlists and tracks. Data is updated or modified in this
+file when using \fBjamjar pull\fR.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar pull\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
