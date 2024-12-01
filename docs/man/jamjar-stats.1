@@ -1,0 +1,96 @@
+.TH "JAMJAR-STATS" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-STATS"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar stats \- Display statistics on playlists, tracks, and users.
+
+.SH "SYNOPSIS"
+.B jamjar stats [\fBOPTIONS\fR]
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar stats\fR command displays various statistics related to the
+playlists, tracks, artists, and users stored in the JamJar database. This
+includes general statistics, top tracks, top artists, top users, and the most
+recent tracks added to the database.
+
+If no options are provided, general statistics are shown by default.
+.RE
+
+.SH "OPTIONS"
+.RE
+\fB--top-tracks\fR
+.RS 4
+Display the top tracks in the database.
+.PP
+
+.RE
+\fB--top-artists\fR
+.RS 4
+Display the top artists in the database.
+.PP
+
+.RE
+\fB--top-users\fR
+.RS 4
+Display the top users in the database.
+.PP
+
+.RE
+\fB--recent-tracks\fR
+.RS 4
+Display the most recent tracks added to the database.
+.PP
+
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Display help information about the \fBjamjar stats\fR command.
+.PP
+
+.SH "EXAMPLES"
+.RE
+To display general statistics about the database:
+.RS 4
+.B $ jamjar stats
+.RE
+
+To get the top tracks in the database:
+.RS 4
+.B $ jamjar stats --top-tracks
+.RE
+
+To get the top artists in the database:
+.RS 4
+.B $ jamjar stats --top-artists
+.RE
+
+To get the top users in the database:
+.RS 4
+.B $ jamjar stats --top-users
+.RE
+
+To get the most recent tracks in the database:
+.RS 4
+.B $ jamjar stats --recent-tracks
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database file where playlist, track, artist, and user data are stored.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar stats\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
