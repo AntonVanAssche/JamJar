@@ -1,0 +1,87 @@
+.TH "JAMJAR" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR" "1"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+JamJar \- "Seal" the history of your Spotify playlists.
+.RE
+
+.SH "SYNOPSIS"
+jamjar [\fCOMMAND\fR] [\fOPTIONS\fR]
+.RE
+
+.SH "DESCRIPTION"
+JamJar is a CLI tool designed to "seal" the history of your Spotify playlists,
+just like a jar preserves your favorite jams. Whether it's a collaborative
+playlist with friends or your personal collection, JamJar saves every track
+and its details into a database. No more losing track of who added what or
+what songs were removed—keep your playlist history fresh and intact, like
+music in a jar!
+.RE
+
+.SH "OPTIONS"
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Show a brief help message.
+.PP
+
+.RE
+\fB--version\fR, \fB-v\fR
+.RS 4
+Display the version number of your JamJar installation.
+.PP
+
+.SH "FILES AND DIRECTORIES"
+.B /usr/local/bin/jamjar
+.RS 4
+Executable binary for the JamJar CLI tool.
+.RE
+
+.B /usr/local/lib/jamjar/
+.RS 4
+Directory where the JamJar virtual environment (venv) is installed. This
+includes all the required Python packages for JamJar, so they do not need to
+be installed globally. The `/usr/local/bin/jamjar` binary will use this venv.
+.RE
+
+.B ~/.config/jamjar/config.json
+.RS 4
+Stores the configuration settings for JamJar, including the Spotify client ID, client secret, and redirect URI.
+.RE
+
+.B ~/.config/jamjar/token.json
+.RS 4
+Stores the Spotify access token and other authentication details.
+.RE
+
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+Stores the database file containing the playlists, tracks, and other related data.
+.RE
+
+.SH "SEE ALSO"
+\fBjamjar-add\fR(1)
+\fBjamjar-auth\fR(1)
+\fBjamjar-config\fR(1)
+\fBjamjar-diff\fR(1)
+\fBjamjar-dump\fR(1)
+\fBjamjar-list\fR(1)
+\fBjamjar-pull\fR(1)
+\fBjamjar-push\fR(1)
+\fBjamjar-rm\fR(1)
+\fBjamjar-stats\fR(1)
+.PP
+
+.SH "AUTHOR"
+\fBAnton Van Assche\fR <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports and other issues regarding \fBJamJar\fR, including suggestions, please
+report to the GitHub link below, through which the project is developed.
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
