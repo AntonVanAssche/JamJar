@@ -83,6 +83,16 @@ jobs:
           dnf install -y *.rpm
           test -f /usr/local/bin/jamjar
           test -d /usr/local/lib/jamjar/
+          test -f /usr/share/man/man1/jamjar.1.gz
+          test -f /usr/share/man/man1/jamjar-add.1.gz
+          test -f /usr/share/man/man1/jamjar-auth.1.gz
+          test -f /usr/share/man/man1/jamjar-config.1.gz
+          test -f /usr/share/man/man1/jamjar-diff.1.gz
+          test -f /usr/share/man/man1/jamjar-list.1.gz
+          test -f /usr/share/man/man1/jamjar-pull.1.gz
+          test -f /usr/share/man/man1/jamjar-push.1.gz
+          test -f /usr/share/man/man1/jamjar-rm.1.gz
+          test -f /usr/share/man/man1/jamjar-stats.1.gz
 
   release:
     needs: test
