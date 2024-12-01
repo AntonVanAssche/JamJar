@@ -1,0 +1,68 @@
+.TH "JAMJAR-LIST" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-LIST"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar list \- Display playlists or tracks in a specific playlist in JSON format.
+
+.SH "SYNOPSIS"
+.B jamjar list [\fBOPTIONS\fR]
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar list\fR command retrieves and displays playlists saved in the
+JamJar database in JSON format. When a specific playlist ID or URL is provide
+, it lists the tracks within that playlist in JSON format. This is useful for
+reviewing your saved playlists or inspecting their contents programmatically.
+.RE
+
+.SH "OPTIONS"
+.RE
+\fB--playlist\fR, \fB-p\fR
+.RS 4
+Specify the ID or URL of the playlist to list its tracks. If omitted, basic
+information about all playlists is displayed.
+.PP
+
+.RE
+\fB--help\fR, \fB-h\fR
+.RS 4
+Display help information about the \fBjamjar list\fR command.
+.PP
+
+.SH "EXAMPLES"
+.RE
+To list all playlists in the database in JSON format:
+.RS 4
+.B $ jamjar list
+.RE
+
+To list all tracks in a specific playlist by ID in JSON format:
+.RS 4
+.B $ jamjar list --playlist 1A2B3C4D5E6F7G
+.RE
+
+To list all tracks in a playlist using its URL in JSON format:
+.RS 4
+.B $ jamjar list --playlist https://open.spotify.com/playlist/1A2B3C4D5E6F7G
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database storing playlist and track information. Data is fetched from this
+file when using \fBjamjar list\fR.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar list\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
