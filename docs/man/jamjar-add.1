@@ -1,0 +1,61 @@
+.TH "JAMJAR-ADD" "1" "2024-12-01" "JAMJAR 2024-12-01" "JAMJAR-ADD"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq
+.ad l
+.nh
+
+.SH "NAME"
+jamjar add \- Add a Spotify playlist to the JamJar database.
+
+.SH "SYNOPSIS"
+.B jamjar add [\fBOPTIONS\fR] \fBPLAYLIST\fR
+.RE
+
+.SH "DESCRIPTION"
+The \fBjamjar add\fR command allows you to save the details and tracks of a
+Spotify playlist into the JamJar database. This preserves playlist history,
+including metadata and tracks, ensuring that no updates or removals go
+unnoticed.
+.RE
+
+.SH "ARGUMENTS"
+.RE
+\fBPLAYLIST\fR
+.RS 4
+The Spotify playlist URL or ID to be added to the database.
+.PP
+
+.SH "OPTIONS"
+.TP
+\fB--help\fR, \fB-h\fR
+Display help information about the \fBjamjar add\fR command.
+
+.SH "EXAMPLES"
+.RE
+To add a playlist using its Spotify URL:
+.RS 4
+.B $ jamjar add https://open.spotify.com/playlist/7vkRueNUYR5eGegLEJnWiy
+.RE
+
+To add a playlist using its Spotify ID:
+.RS 4
+.B $ jamjar add 7vkRueNUYR5eGegLEJnWiy
+.RE
+
+.SH "FILES AND DIRECTORIES"
+.B ~/.local/share/jamjar/jamjar.db
+.RS 4
+The database where playlist information is stored, including metadata and
+tracks.
+.RE
+
+.SH "AUTHOR"
+Anton Van Assche <\fIhttps://www.github.com/AntonVanAssche\fR>
+.PP
+
+.SH "BUGS"
+For bug reports, suggestions, and issues related to \fBjamjar add\fR or the
+JamJar tool, please visit:
+.PP
+<\fIhttps://github.com/AntonVanAssche/JamJar\fR>
+.RE
