@@ -6,6 +6,6 @@ idna==3.10
 packaging==24.2
 pyproject_hooks==1.2.0
 requests==2.32.3
-setuptools==78.1.1
+setuptools==80.8.0
 urllib3==2.4.0
 wheel==0.45.1
