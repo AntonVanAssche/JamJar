@@ -1,7 +1,7 @@
 build==1.2.2.post1
 certifi==2025.4.26
 charset-normalizer==3.4.2
-click==8.1.7
+click==8.2.1
 idna==3.10
 packaging==25.0
 pyproject_hooks==1.2.0
