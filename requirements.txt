@@ -1,6 +1,6 @@
 build==1.2.2.post1
 certifi==2025.7.14
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
 click==8.2.1
 idna==3.10
 packaging==25.0
